@@ -1,5 +1,21 @@
 import { Component} from '@stencil/core';
 
+const example1 = {
+  data: [
+      {
+        first: 'George'
+      }
+  ],
+  columns: [
+    {
+      property: 'first'
+    }
+  ],
+  options: {
+
+  }
+};
+
 @Component({
   tag: 'fixtable-demo',
   styleUrl: 'fixtable-demo.css',
@@ -8,22 +24,13 @@ import { Component} from '@stencil/core';
 export class FixtableDemo {
 
   render() {
-    let data = [
-      {
-        first: 'George'
-      }
-    ];
-    let columns = [
-      {
-        property: 'first'
-      }
-    ];
-    let options = {
-
-    };
 
     return (
-      <fixtable-grid columns={columns} options={options} data={data}></fixtable-grid>
+      <div>
+        <h3>Simple Example</h3>
+        <p>This Fixtable loads and renders all of its content without any pagination or filtering.</p>
+        <fixtable-grid columns={example1.columns} options={example1.options} data={example1.data}></fixtable-grid>
+      </div>
     );
   }
 }
