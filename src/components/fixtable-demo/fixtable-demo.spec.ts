@@ -1,9 +1,9 @@
 import { TestWindow } from '@stencil/core/testing';
-import { MyComponent } from './my-component';
+import { StencilDemo } from './my-component';
 
 describe('my-component', () => {
   it('should build', () => {
-    expect(new MyComponent()).toBeTruthy();
+    expect(new StencilDemo()).toBeTruthy();
   });
 
   describe('rendering', () => {
@@ -12,7 +12,7 @@ describe('my-component', () => {
     beforeEach(async () => {
       testWindow = new TestWindow();
       element = await testWindow.load({
-        components: [MyComponent],
+        components: [StencilDemo],
         html: '<my-component></my-component>'
       });
     });
