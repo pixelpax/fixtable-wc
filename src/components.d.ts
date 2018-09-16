@@ -8,6 +8,7 @@ import '@stencil/core';
 
 
 import {
+  ColumnDef,
   FixtableOptions,
 } from './components/fixtable-grid/fixtable-grid';
 
@@ -32,7 +33,7 @@ declare global {
     }
 
     interface FixtableGrid {
-      'columnFilters': any[];
+      'columns': ColumnDef[];
       'data': any[];
       'options': FixtableOptions;
     }
@@ -70,7 +71,7 @@ declare global {
     }
 
     export interface FixtableGridAttributes extends HTMLAttributes {
-      'columnFilters'?: any[];
+      'columns'?: ColumnDef[];
       'data'?: any[];
       'options'?: FixtableOptions;
     }

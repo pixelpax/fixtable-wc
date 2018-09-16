@@ -13,16 +13,17 @@ export class FixtableDemo {
         first: 'George'
       }
     ];
+    let columns = [
+      {
+        property: 'first'
+      }
+    ];
     let options = {
-      columns: [
-        {
-          property: 'first'
-        }
-      ]
+
     };
 
     return (
-      <fixtable-grid options={options} data={data}></fixtable-grid>
+      <fixtable-grid columns={columns} options={options} data={data}></fixtable-grid>
     );
   }
 }

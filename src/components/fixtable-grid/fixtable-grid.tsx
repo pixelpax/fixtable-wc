@@ -10,9 +10,9 @@ export interface ColumnDef {
 
 export interface FixtableOptions {
   tableClass?: string;
+  columnFilters?: any[];
   rowSelection?: boolean;
   checkBoxHeaderElement?: () => Element
-  columns: ColumnDef[]
   cellConstructor?: (row: any, column: ColumnDef) => VNode
 }
 
@@ -35,7 +35,7 @@ export class FixtableGrid {
 
   @Prop() data: any[];
   @Prop() options: FixtableOptions;
-  @Prop() columnFilters: any[];
+  @Prop() columns: ColumnDef[];
   @Element() element: HTMLElement;
 
   _initializeFixtable() {
@@ -48,7 +48,7 @@ export class FixtableGrid {
       fixtable.setColumnWidth(1, checkboxColumnWidth);
     }
 
-    this.options.columns.forEach( (column, index) => {
+    this.columns.forEach( (column, index) => {
       if (column.width) {
         fixtable.setColumnWidth(index + indexOffset, column.width)
       }
@@ -64,10 +64,11 @@ export class FixtableGrid {
 
   render() {
 
-    let {options, data, columnFilters} = this;
+    let {options, data, columns} = this;
 
     // Merge defaults (May want to put this in the onLoad lifecycle hook)
     options = {...defaultFixtableOptions, ...options};
+    let {columnFilters} = options;
     columnFilters = columnFilters || [];
 
     return (
@@ -97,7 +98,7 @@ export class FixtableGrid {
                   : null
                 }
                 {
-                  options.columns.map((columnDef) => {
+                  columns.map((columnDef) => {
                     return (
                       <th
                         >
@@ -121,7 +122,7 @@ export class FixtableGrid {
                 <tr
                 >
                   {
-                    options.columns.map((col /*(, colIndex)*/) => {
+                    columns.map((col /*(, colIndex)*/) => {
                       return (
                         <td>
                           {
