@@ -5,6 +5,7 @@ import Fixtable from 'fixtable/dist/fixtable';
 export interface ColumnDef {
   property: string;
   cellConstructor?: (row: any, col: any) => Element;
+  width?: number;
 }
 
 export interface FixtableOptions {
@@ -22,12 +23,15 @@ export const defaultFixtableOptions = {
   }
 };
 
+const checkboxColumnWidth = 40;
 
 @Component({
   tag: 'fixtable-grid',
   styleUrl: 'fixtable-grid.css',
 })
 export class FixtableGrid {
+
+  _fixtable: any;
 
   @Prop() data: any[];
   @Prop() options: FixtableOptions;
@@ -36,7 +40,22 @@ export class FixtableGrid {
 
   _initializeFixtable() {
     let fixtable = new Fixtable(this.element, true); //TODO: Differentiate between debug mode and non
-    return fixtable
+
+    // account for the row selection checkbox column, if present
+    let indexOffset = 1;
+    if (this.options.rowSelection) {
+      indexOffset++;
+      fixtable.setColumnWidth(1, checkboxColumnWidth);
+    }
+
+    this.options.columns.forEach( (column, index) => {
+      if (column.width) {
+        fixtable.setColumnWidth(index + indexOffset, column.width)
+      }
+    });
+
+    fixtable.setDimensions();
+    this._fixtable = fixtable;
   }
 
   componentDidLoad() {
