@@ -1,5 +1,6 @@
-import { Component, Prop } from '@stencil/core';
+import { Component, Prop, Element } from '@stencil/core';
 import {VNode} from "@stencil/core/dist/declarations";
+import Fixtable from 'fixtable/dist/fixtable';
 
 export interface ColumnDef {
   property: string;
@@ -17,8 +18,7 @@ export interface FixtableOptions {
 export const defaultFixtableOptions = {
   rowSelection: false,
   cellConstructor: (row: any, column: ColumnDef) => {
-    let virtualElement = h('span', null, row[column.property]);
-    return virtualElement;
+    return h('span', null, row[column.property]);
   }
 };
 
@@ -32,7 +32,16 @@ export class FixtableGrid {
   @Prop() data: any[];
   @Prop() options: FixtableOptions;
   @Prop() columnFilters: any[];
+  @Element() element: HTMLElement;
 
+  _initializeFixtable() {
+    let fixtable = new Fixtable(this.element, true); //TODO: Differentiate between debug mode and non
+    return fixtable
+  }
+
+  componentDidLoad() {
+    this._initializeFixtable();
+  }
 
   render() {
 
@@ -96,8 +105,6 @@ export class FixtableGrid {
                     options.columns.map((col /*(, colIndex)*/) => {
                       return (
                         <td>
-                          {/* TODO: Allow for custom constructors for cells
-                          */}
                           {
                               col.cellConstructor ?
                                 col.cellConstructor(row, col) :
