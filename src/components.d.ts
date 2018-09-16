@@ -25,37 +25,75 @@ declare global {
   interface HTMLAttributes {}
 }
 
+import {
+  FixtableOptions,
+} from './components/fixtable-grid/fixtable-grid';
 
 declare global {
 
   namespace StencilComponents {
-    interface MyComponent {
-      'first': string;
-      'last': string;
+    interface FixtableDemo {
+
     }
   }
 
-  interface HTMLMyComponentElement extends StencilComponents.MyComponent, HTMLStencilElement {}
+  interface HTMLFixtableDemoElement extends StencilComponents.FixtableDemo, HTMLStencilElement {}
 
-  var HTMLMyComponentElement: {
-    prototype: HTMLMyComponentElement;
-    new (): HTMLMyComponentElement;
+  var HTMLFixtableDemoElement: {
+    prototype: HTMLFixtableDemoElement;
+    new (): HTMLFixtableDemoElement;
   };
   interface HTMLElementTagNameMap {
-    'my-component': HTMLMyComponentElement;
+    'fixtable-demo': HTMLFixtableDemoElement;
   }
   interface ElementTagNameMap {
-    'my-component': HTMLMyComponentElement;
+    'fixtable-demo': HTMLFixtableDemoElement;
   }
   namespace JSX {
     interface IntrinsicElements {
-      'my-component': JSXElements.MyComponentAttributes;
+      'fixtable-demo': JSXElements.FixtableDemoAttributes;
     }
   }
   namespace JSXElements {
-    export interface MyComponentAttributes extends HTMLAttributes {
-      'first'?: string;
-      'last'?: string;
+    export interface FixtableDemoAttributes extends HTMLAttributes {
+
+    }
+  }
+}
+
+
+declare global {
+
+  namespace StencilComponents {
+    interface FixtableGrid {
+      'columnFilters': any[];
+      'data': any[];
+      'options': FixtableOptions;
+    }
+  }
+
+  interface HTMLFixtableGridElement extends StencilComponents.FixtableGrid, HTMLStencilElement {}
+
+  var HTMLFixtableGridElement: {
+    prototype: HTMLFixtableGridElement;
+    new (): HTMLFixtableGridElement;
+  };
+  interface HTMLElementTagNameMap {
+    'fixtable-grid': HTMLFixtableGridElement;
+  }
+  interface ElementTagNameMap {
+    'fixtable-grid': HTMLFixtableGridElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      'fixtable-grid': JSXElements.FixtableGridAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface FixtableGridAttributes extends HTMLAttributes {
+      'columnFilters'?: any[];
+      'data'?: any[];
+      'options'?: FixtableOptions;
     }
   }
 }
