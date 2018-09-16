@@ -9,6 +9,7 @@ export interface ColumnDef {
 }
 
 export interface FixtableOptions {
+  fixtableClass?: string;
   tableClass?: string;
   columnFilters?: any[];
   rowSelection?: boolean;
@@ -17,6 +18,8 @@ export interface FixtableOptions {
 }
 
 export const defaultFixtableOptions = {
+  fixtableClass: '',
+  tableClass: '',
   rowSelection: false,
   cellConstructor: (row: any, column: ColumnDef) => {
     return h('span', null, row[column.property]);
@@ -27,7 +30,7 @@ const checkboxColumnWidth = 40;
 
 @Component({
   tag: 'fixtable-grid',
-  styleUrl: 'fixtable-grid.css',
+  styleUrl: 'fixtable-grid.scss',
 })
 export class FixtableGrid {
 
@@ -72,7 +75,9 @@ export class FixtableGrid {
     columnFilters = columnFilters || [];
 
     return (
-      <div class={'fixtable ' +  (columnFilters.length ? 'fixtable-has-filter' : '')}>
+      <div class={'fixtable '
+                  + options.fixtableClass + ' '
+                  + (columnFilters.length ? 'fixtable-has-filter' : '')}>
 
         {/* We keep an empty element here for fixtable-vanilla to inject the headers.
             The properties will be managed by fixtable-vanilla */}
