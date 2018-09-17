@@ -31,6 +31,7 @@ const checkboxColumnWidth = 40;
 @Component({
   tag: 'fixtable-grid',
   styleUrl: 'fixtable-grid.scss',
+  shadow: false
 })
 export class FixtableGrid {
 
@@ -107,8 +108,10 @@ export class FixtableGrid {
                     return (
                       <th
                         >
+                        <div>
                           {/* Put the sorting logic back into the logic above*/}
                           {columnDef.property}
+                        </div>
                       </th>
                     )
                   })
