@@ -4,25 +4,44 @@ import Fixtable from 'fixtable/dist/fixtable';
 
 export interface ColumnDef {
   property: string;
-  cellConstructor?: (row: any, col: any) => Element;
+  cellComponentFactory?: ComponentFactory;
   width?: number;
 }
+
+export type JSXFactory = (...args: any[]) => VNode;
+export type DOMElementFactory = (...args: any[]) => HTMLElement;
+
+// Could add this back to the menu if there's any demand for it
+// export interface JSXComponentInterface {
+//   new: () => {
+//     render: () => VNode
+//   }
+// }
+
+export type ComponentFactory = JSXFactory |
+                               DOMElementFactory
 
 export interface FixtableOptions {
   fixtableClass?: string;
   tableClass?: string;
   columnFilters?: any[];
   rowSelection?: boolean;
-  checkBoxHeaderElement?: () => Element
-  cellConstructor?: (row: any, column: ColumnDef) => VNode
+  checkBoxHeaderElement?: () => Element;
+  cellComponentFactory?: ComponentFactory;
 }
 
 export const defaultFixtableOptions = {
   fixtableClass: '',
   tableClass: '',
   rowSelection: false,
-  cellConstructor: (row: any, column: ColumnDef) => {
-    return h('span', null, row[column.property]);
+  // cellComponentFactory: (row: any, column: ColumnDef) => {
+  //   // return h('span', null, row[column.property]);
+  //   return <span>{row[column.property]}</span>
+  // }
+  cellComponentFactory: (row: any, column: ColumnDef) => {
+    let newCell =  document.createElement('span');
+    newCell.innerText = row[column.property];
+    return newCell;
   }
 };
 
@@ -127,17 +146,22 @@ export class FixtableGrid {
             {/** Table Rows **/}
             {
               data.map((row/* , rowIndex*/) =>
-                <tr
-                >
+                <tr>
                   {
                     columns.map((col /*(, colIndex)*/) => {
                       return (
                         <td>
-                          {
-                              col.cellConstructor ?
-                                col.cellConstructor(row, col) :
-                                options.cellConstructor(row, col)
-                          }
+                          <fixtable-cell
+                            cellFactory={
+                              col.cellComponentFactory ?
+                                col.cellComponentFactory :
+                                options.cellComponentFactory
+                            }
+                            row={row}
+                            column={col}
+                          >
+
+                          </fixtable-cell>
                         </td>
                       )
                     })
