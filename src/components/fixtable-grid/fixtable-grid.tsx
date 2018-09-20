@@ -35,7 +35,6 @@ export const defaultFixtableOptions = {
   tableClass: '',
   rowSelection: false,
   // cellComponentFactory: (row: any, column: ColumnDef) => {
-  //   // return h('span', null, row[column.property]);
   //   return <span>{row[column.property]}</span>
   // }
   cellComponentFactory: (row: any, column: ColumnDef) => {
