@@ -63,7 +63,9 @@ export class FixtableGrid {
   @Element() element: HTMLElement;
 
   _initializeFixtable() {
-    let fixtable = new Fixtable(this.element, true); //TODO: Differentiate between debug mode and non
+    let fixtableEl = this.element.querySelector('.fixtable');
+
+    let fixtable = new Fixtable(fixtableEl, true); //TODO: Differentiate between debug mode and non
 
     // account for the row selection checkbox column, if present
     let indexOffset = 1;
