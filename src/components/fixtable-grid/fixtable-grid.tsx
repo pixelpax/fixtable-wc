@@ -4,7 +4,7 @@ import Fixtable from 'fixtable/dist/fixtable';
 
 export interface ColumnDef {
   key: string;
-  label: string;
+  label?: string;
   cellComponentFactory?: ComponentFactory;
   width?: number;
 }
