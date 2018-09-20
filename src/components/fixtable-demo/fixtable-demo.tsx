@@ -1,17 +1,39 @@
 import {Component, State} from '@stencil/core';
 import { getDemoData } from "./fixtable-demo.data";
 
+const data = getDemoData();
+
 const example1 = {
-  data: getDemoData(),
+  data: data,
   columns: [
     {
-      property: 'name'
+      key: 'name'
     },
     {
-      property: 'address'
+      key: 'address'
     },
     {
-      property: 'alignment'
+      key: 'alignment'
+    }
+  ],
+  options: {
+    fixtableClass: "restrict-height"
+  }
+};
+
+const example2 = {
+  data: data,
+  columns: [
+    {
+      key: 'name',
+      label: 'Name'
+    },
+    {
+      key: 'address',
+      label: 'Address'
+    },
+    {
+      key: 'alignment'
     }
   ],
   options: {
@@ -48,16 +70,24 @@ export class FixtableDemo {
         <p>This Fixtable loads and renders all of its content without any pagination or filtering.</p>
         <div class="row">
           <div class="col-md-8">
-              <fixtable-grid
-                columns={example1.columns}
-                options={example1.options}
-                data={this.data1}
-              ></fixtable-grid>
+            <fixtable-grid
+              columns={example1.columns}
+              options={example1.options}
+              data={example1.data}
+            ></fixtable-grid>
           </div>
         </div>
-        <button onClick={this.addAdditionalRow.bind(this)}>
-          Add additional row
-        </button>
+        <h3></h3>
+        <p>This Fixtable loads all of its content at once but paginates it on the client.</p>
+        <div class="row">
+          <div class="col-md-8">
+            <fixtable-grid
+              columns={example2.columns}
+              options={example2.options}
+              data={example2.data}
+            ></fixtable-grid>
+          </div>
+        </div>
       </div>
     );
   }

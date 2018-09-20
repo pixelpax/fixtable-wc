@@ -3,7 +3,8 @@ import {VNode} from "@stencil/core/dist/declarations";
 import Fixtable from 'fixtable/dist/fixtable';
 
 export interface ColumnDef {
-  property: string;
+  key: string;
+  label: string;
   cellComponentFactory?: ComponentFactory;
   width?: number;
 }
@@ -41,7 +42,7 @@ export const defaultFixtableOptions = {
   // }
   cellComponentFactory: (row: any, column: ColumnDef) => {
     let newCell =  document.createElement('span');
-    newCell.innerText = row[column.property];
+    newCell.innerText = row[column.key];
     return newCell;
   }
 };
@@ -132,7 +133,7 @@ export class FixtableGrid {
                         >
                         <div>
                           {/* Put the sorting logic back into the logic above*/}
-                          {columnDef.property}
+                          {columnDef.label || columnDef.key}
                         </div>
                       </th>
                     )
@@ -173,6 +174,8 @@ export class FixtableGrid {
             }
             </tbody>
           </table>
+        </div>
+        <div class='fixtable-footer'>
         </div>
       </div>
     );
