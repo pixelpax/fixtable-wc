@@ -153,7 +153,7 @@ export class FixtableGrid {
                       return (
                         <td>
                           <fixtable-cell
-                            cellFactory={
+                            componentFactory={
                               col.cellComponentFactory ?
                                 col.cellComponentFactory :
                                 options.cellComponentFactory

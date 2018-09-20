@@ -31,9 +31,13 @@ declare global {
 
   namespace StencilComponents {
 
+    interface FactoryTaker {
+      'componentFactory': ComponentFactory;
+    }
+
     interface FixtableCell {
-      'cellFactory': ComponentFactory;
       'column': any;
+      'componentFactory': ComponentFactory;
       'row': any;
     }
 
@@ -48,6 +52,14 @@ declare global {
     }
   }
 
+
+    interface HTMLFactoryTakerElement extends StencilComponents.FactoryTaker, HTMLStencilElement {}
+
+    var HTMLFactoryTakerElement: {
+      prototype: HTMLFactoryTakerElement;
+      new (): HTMLFactoryTakerElement;
+    };
+    
 
     interface HTMLFixtableCellElement extends StencilComponents.FixtableCell, HTMLStencilElement {}
 
@@ -76,6 +88,7 @@ declare global {
   namespace JSX {
     interface Element {}
     export interface IntrinsicElements {
+    'factory-taker': JSXElements.FactoryTakerAttributes;
     'fixtable-cell': JSXElements.FixtableCellAttributes;
     'fixtable-demo': JSXElements.FixtableDemoAttributes;
     'fixtable-grid': JSXElements.FixtableGridAttributes;
@@ -84,9 +97,13 @@ declare global {
 
   namespace JSXElements {
 
+    export interface FactoryTakerAttributes extends HTMLAttributes {
+      'componentFactory'?: ComponentFactory;
+    }
+
     export interface FixtableCellAttributes extends HTMLAttributes {
-      'cellFactory'?: ComponentFactory;
       'column'?: any;
+      'componentFactory'?: ComponentFactory;
       'row'?: any;
     }
 
@@ -102,12 +119,14 @@ declare global {
   }
 
   interface HTMLElementTagNameMap {
+    'factory-taker': HTMLFactoryTakerElement
     'fixtable-cell': HTMLFixtableCellElement
     'fixtable-demo': HTMLFixtableDemoElement
     'fixtable-grid': HTMLFixtableGridElement
   }
 
   interface ElementTagNameMap {
+    'factory-taker': HTMLFactoryTakerElement;
     'fixtable-cell': HTMLFixtableCellElement;
     'fixtable-demo': HTMLFixtableDemoElement;
     'fixtable-grid': HTMLFixtableGridElement;
