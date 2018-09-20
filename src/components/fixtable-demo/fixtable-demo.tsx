@@ -1,4 +1,4 @@
-import { Component} from '@stencil/core';
+import {Component, State} from '@stencil/core';
 import { getDemoData } from "./fixtable-demo.data";
 
 const example1 = {
@@ -26,6 +26,20 @@ const example1 = {
 })
 export class FixtableDemo {
 
+  @State()
+  data1: any[];
+
+  componentWillLoad() {
+    this.data1 = example1.data;
+  }
+
+  addAdditionalRow() {
+    this.data1 = [
+      ...this.data1,
+      {name: 'Talisa Stark', address: 'House Stark', alignment: 'Good'}
+    ]
+  }
+
   render() {
 
     return (
@@ -37,10 +51,13 @@ export class FixtableDemo {
               <fixtable-grid
                 columns={example1.columns}
                 options={example1.options}
-                data={example1.data}
+                data={this.data1}
               ></fixtable-grid>
           </div>
         </div>
+        <button onClick={this.addAdditionalRow.bind(this)}>
+          Add additional row
+        </button>
       </div>
     );
   }

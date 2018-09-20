@@ -1,4 +1,4 @@
-import { Component, Prop, Element } from '@stencil/core';
+import {Component, Prop, Element, State} from '@stencil/core';
 import {ComponentFactory} from "../fixtable-grid/fixtable-grid";
 import {VNode} from "@stencil/core/dist/declarations";
 
@@ -16,6 +16,8 @@ export class FixtableCell {
   @Prop() column: any;
   @Prop() cellFactory: ComponentFactory;
 
+  @State() clazz;
+
   _cellComponent: VNode | HTMLElement;
   _insertAfterRender: boolean;
 
@@ -25,18 +27,20 @@ export class FixtableCell {
   }
 
   componentDidUpdate() {
-    this.element.appendChild(this._cellComponent as HTMLElement);
+    if (this._insertAfterRender) {
+      this.element.appendChild(this._cellComponent as HTMLElement);
+    }
   }
 
   componentDidLoad() {
-    this.element.appendChild(this._cellComponent as HTMLElement);
+    if (this._insertAfterRender) {
+      this.element.appendChild(this._cellComponent as HTMLElement);
+    }
   }
 
   render() {
     if (!this._insertAfterRender) {
       return this._cellComponent;
-    } else {
-      return <div></div>
     }
   }
 

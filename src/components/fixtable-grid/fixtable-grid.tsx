@@ -34,6 +34,8 @@ export const defaultFixtableOptions = {
   fixtableClass: '',
   tableClass: '',
   rowSelection: false,
+
+  // EXAMPLE: How you'd write the table cell if inserting directly into the
   // cellComponentFactory: (row: any, column: ColumnDef) => {
   //   return <span>{row[column.property]}</span>
   // }
@@ -159,7 +161,6 @@ export class FixtableGrid {
                             row={row}
                             column={col}
                           >
-
                           </fixtable-cell>
                         </td>
                       )
