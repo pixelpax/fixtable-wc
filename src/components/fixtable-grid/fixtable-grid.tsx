@@ -65,7 +65,7 @@ export class FixtableGrid {
     sortColumn: ColumnDef;
   } = {data: [], sortColumn: null};
 
-  private nextRowId: number;
+  private nextRowKey: number;
 
   @State() sortColumn: ColumnDef;
 
@@ -97,9 +97,12 @@ export class FixtableGrid {
     this._fixtable = fixtable;
   }
 
+  componentWillLoad() {
+    this.nextRowKey = 0;
+  }
+
   componentDidLoad() {
     this.initializeFixtable();
-    this.nextRowId = 0;
   }
 
   static _defaultCompareFn(x, y) {
@@ -128,8 +131,8 @@ export class FixtableGrid {
   get keyedData() {
     return this.data.map((row) => {
       if (!row._fixtableKey) {
-        row._fixtableKey = this.nextRowId;
-        this.nextRowId++;
+        row._fixtableKey = this.nextRowKey;
+        this.nextRowKey++;
       }
       return row;
     });
