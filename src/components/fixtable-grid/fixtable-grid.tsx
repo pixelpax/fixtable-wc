@@ -1,4 +1,4 @@
-import { Component, Prop, Element } from '@stencil/core';
+import {Component, Prop, Element, State} from '@stencil/core';
 import {VNode} from "@stencil/core/dist/declarations";
 import Fixtable from 'fixtable/dist/fixtable';
 
@@ -7,6 +7,8 @@ export interface ColumnDef {
   label?: string;
   cellComponentFactory?: ComponentFactory;
   width?: number;
+  sortable?: boolean;
+  compareFn?: (x: any, y: any) => number;
 }
 
 export type JSXFactory = (...args: any[]) => VNode;
@@ -40,6 +42,7 @@ export const defaultFixtableOptions = {
   // cellComponentFactory: (row: any, column: ColumnDef) => {
   //   return <span>{row[column.property]}</span>
   // }
+  // TODO: Rename lose factory
   cellComponentFactory: (row: any, column: ColumnDef) => {
     let newCell =  document.createElement('span');
     newCell.innerText = row[column.key];
@@ -57,13 +60,22 @@ const checkboxColumnWidth = 40;
 export class FixtableGrid {
 
   _fixtable: any;
+  private _sortedDataCache: {
+    data: any[];
+    sortColumn: ColumnDef;
+  } = {data: [], sortColumn: null};
+
+  private nextRowId: number;
+
+  @State() sortColumn: ColumnDef;
 
   @Prop() data: any[];
   @Prop() options: FixtableOptions;
   @Prop() columns: ColumnDef[];
   @Element() element: HTMLElement;
 
-  _initializeFixtable() {
+  // TODO: Get rid of underscores for private methods and attributes
+  private initializeFixtable() {
     let fixtableEl = this.element.querySelector('.fixtable');
 
     let fixtable = new Fixtable(fixtableEl, true); //TODO: Differentiate between debug mode and non
@@ -86,17 +98,68 @@ export class FixtableGrid {
   }
 
   componentDidLoad() {
-    this._initializeFixtable();
+    this.initializeFixtable();
+    this.nextRowId = 0;
   }
+
+  static _defaultCompareFn(x, y) {
+      return x > y ? 1 : -1;
+  }
+
+  clientSortedData() {
+    try {
+      // Updated the sorted cache if the sort column has changed
+      if (this._sortedDataCache.sortColumn !== this.sortColumn) {
+        let sortMethod = this.sortColumn.compareFn || FixtableGrid._defaultCompareFn;
+        this._sortedDataCache.data = this.keyedData.sort((datum0, datum1) => {
+          return sortMethod(datum0[this.sortColumn.key], datum1[this.sortColumn.key]);
+        });
+        this._sortedDataCache.sortColumn = this.sortColumn;
+      }
+
+      //
+      return this._sortedDataCache.data;
+    } catch (e) {
+      console.error(`Could not sort by ${this.sortColumn.key}. Check your compare function.`, e);
+    }
+  }
+
+
+  get keyedData() {
+    return this.data.map((row) => {
+      if (!row._fixtableKey) {
+        row._fixtableKey = this.nextRowId;
+        this.nextRowId++;
+      }
+      return row;
+    });
+  }
+
+  processedData() {
+    if (this.sortColumn) {
+      return this.clientSortedData()
+    } else {
+      return this.keyedData;
+    }
+  }
+
+  onColumnHeaderClicked(column: ColumnDef) {
+    if(column.sortable) {
+      this.sortColumn = column;
+    }
+  }
+
 
   render() {
 
-    let {options, data, columns} = this;
+    let {options, columns} = this;
 
     // Merge defaults (May want to put this in the onLoad lifecycle hook)
     options = {...defaultFixtableOptions, ...options};
     let {columnFilters} = options;
     columnFilters = columnFilters || [];
+
+    let pd = this.processedData();
 
     return (
       <div class={'fixtable '
@@ -127,14 +190,14 @@ export class FixtableGrid {
                   : null
                 }
                 {
-                  columns.map((columnDef) => {
+                  columns.map((column) => {
                     return (
                       <th
                         >
-                        <div>
+                        <button onClick={()=>{this.onColumnHeaderClicked(column)}}>
                           {/* Put the sorting logic back into the logic above*/}
-                          {columnDef.label || columnDef.key}
-                        </div>
+                          {column.label || column.key}
+                        </button>
                       </th>
                     )
                   })
@@ -149,8 +212,8 @@ export class FixtableGrid {
 
             {/** Table Rows **/}
             {
-              data.map((row/* , rowIndex*/) =>
-                <tr>
+              pd.map((row) =>
+                <tr key={row._fixtableKey}>
                   {
                     columns.map((col /*(, colIndex)*/) => {
                       return (

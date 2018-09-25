@@ -1,6 +1,6 @@
 import {Component, Prop, Element} from '@stencil/core';
 import {FactoryTaker} from '../factory-taker/factory-taker';
-import {ComponentFactory} from "../fixtable-grid/fixtable-grid";
+import {ColumnDef, ComponentFactory} from "../fixtable-grid/fixtable-grid";
 
 
 @Component({
@@ -13,10 +13,10 @@ export class FixtableCell extends FactoryTaker {
   @Element() _element:  HTMLElement;
 
   @Prop()
-  row: any;
+  row;
 
   @Prop()
-  column: any;
+  column: ColumnDef;
 
   @Prop()
   componentFactory: ComponentFactory;

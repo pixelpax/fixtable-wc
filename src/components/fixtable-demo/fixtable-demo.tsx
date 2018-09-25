@@ -7,7 +7,8 @@ const example1 = {
   data: data,
   columns: [
     {
-      key: 'name'
+      key: 'name',
+      sortable: true
     },
     {
       key: 'address'
@@ -61,6 +62,21 @@ export class FixtableDemo {
       {name: 'Talisa Stark', address: 'House Stark', alignment: 'Good'}
     ]
   }
+
+  // @State()
+  // reversibleData: any[];
+  //
+  // willLoadComponent() {
+  //   this.reversibleData = [
+  //     'foo',
+  //     'bar',
+  //     'baz'
+  //   ]
+  // }
+  //
+  // reverseData() {
+  //   this.reversibleData = this.reversibleData.reverse();
+  // }
 
   render() {
 
