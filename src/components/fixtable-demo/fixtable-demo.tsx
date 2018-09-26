@@ -11,7 +11,8 @@ const example1 = {
       sortable: true
     },
     {
-      key: 'address'
+      key: 'address',
+      sortable: true
     },
     {
       key: 'alignment'

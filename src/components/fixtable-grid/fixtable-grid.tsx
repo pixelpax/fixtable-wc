@@ -63,11 +63,17 @@ export class FixtableGrid {
   private _sortedDataCache: {
     data: any[];
     sortColumn: ColumnDef;
-  } = {data: [], sortColumn: null};
+    sortDirection: number;
+  } = {
+    data: [],
+    sortColumn: null,
+    sortDirection: 1
+  };
 
   private nextRowKey: number;
 
   @State() sortColumn: ColumnDef;
+  @State() sortDirection: number; // 1 will sort low-to-high, -1 will sort high-to-low
 
   @Prop() data: any[];
   @Prop() options: FixtableOptions;
@@ -118,6 +124,11 @@ export class FixtableGrid {
           return sortMethod(datum0[this.sortColumn.key], datum1[this.sortColumn.key]);
         });
         this._sortedDataCache.sortColumn = this.sortColumn;
+
+      // If they are sorting by the same column but changed direction
+      } else if (this._sortedDataCache.sortDirection !== this.sortDirection) {
+        this._sortedDataCache.data = this._sortedDataCache.data.reverse();
+        this._sortedDataCache.sortDirection = this.sortDirection;
       }
 
       //
@@ -148,7 +159,12 @@ export class FixtableGrid {
 
   onColumnHeaderClicked(column: ColumnDef) {
     if(column.sortable) {
-      this.sortColumn = column;
+      if (this.sortColumn === column) {
+        this.sortDirection = -this.sortDirection;
+      } else {
+        this.sortColumn = column;
+        this.sortDirection = 1;
+      }
     }
   }
 
@@ -197,10 +213,10 @@ export class FixtableGrid {
                     return (
                       <th
                         >
-                        <button onClick={()=>{this.onColumnHeaderClicked(column)}}>
+                        <span onClick={()=>{this.onColumnHeaderClicked(column)}}>
                           {/* Put the sorting logic back into the logic above*/}
                           {column.label || column.key}
-                        </button>
+                        </span>
                       </th>
                     )
                   })
