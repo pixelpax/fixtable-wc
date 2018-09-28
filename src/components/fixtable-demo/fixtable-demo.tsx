@@ -8,11 +8,13 @@ const example1 = {
   columns: [
     {
       key: 'name',
-      sortable: true
+      sortable: true,
+      filterable: true
     },
     {
       key: 'address',
-      sortable: true
+      sortable: true,
+      filterable: true
     },
     {
       key: 'alignment'

@@ -9,6 +9,9 @@ export interface ColumnDef {
   width?: number;
   sortable?: boolean;
   compareFn?: (x: any, y: any) => number;
+  filterFn?: (x: any) => boolean;
+  defaultFilterValue?: any;
+  filterable?: boolean;
 }
 
 export type JSXFactory = (...args: any[]) => VNode;
@@ -29,7 +32,7 @@ export interface FixtableOptions {
   tableClass?: string;
   columnFilters?: any[];
   rowSelection?: boolean;
-  checkBoxHeaderElement?: () => Element;
+  checkBoxHeader?: () => Element;
   cellComponentFactory?: ComponentFactory;
 }
 
@@ -40,7 +43,7 @@ export const defaultFixtableOptions = {
 
   // EXAMPLE: How you'd write the table cell if inserting directly into the
   // cellComponentFactory: (row: any, column: ColumnDef) => {
-  //   return <span>{row[column.property]}</span>
+  //   return <span>{row[column.key]}</span>
   // }
   // TODO: Rename lose factory
   cellComponentFactory: (row: any, column: ColumnDef) => {
@@ -49,6 +52,12 @@ export const defaultFixtableOptions = {
     return newCell;
   }
 };
+
+type ColumnFilter = {
+  value: any;
+  column: ColumnDef;
+};
+
 
 const checkboxColumnWidth = 40;
 
@@ -64,16 +73,19 @@ export class FixtableGrid {
     data: any[];
     sortColumn: ColumnDef;
     sortDirection: number;
+    columnFilters: {[key:string]: ColumnFilter};
   } = {
     data: [],
     sortColumn: null,
-    sortDirection: 1
+    sortDirection: 1,
+    columnFilters: {}
   };
 
   private nextRowKey: number;
 
   @State() sortColumn: ColumnDef;
   @State() sortDirection: number; // 1 will sort low-to-high, -1 will sort high-to-low
+  @State() columnFilters: {[key:string]: ColumnFilter} = {};
 
   @Prop() data: any[];
   @Prop() options: FixtableOptions;
@@ -104,7 +116,19 @@ export class FixtableGrid {
   }
 
   componentWillLoad() {
+    // Set some initial values
     this.nextRowKey = 0;
+
+    // Initialize filter models for filterable columns
+    this.columns.forEach((column: ColumnDef) => {
+      if (column.filterable) {
+        this.columnFilters[column.key] = {
+          column,
+          value: column.defaultFilterValue || ''
+        }
+      }
+    });
+
   }
 
   componentDidLoad() {
@@ -115,15 +139,43 @@ export class FixtableGrid {
       return x > y ? 1 : -1;
   }
 
+  static defaultFilterFn(filterValue: any, row: any, column: ColumnDef) {
+    if (filterValue && typeof filterValue === 'string') {
+      return row[column.key] && row[column.key].includes(filterValue)
+    } else {
+      return true;
+    }
+  }
+
+  get filteredData() {
+    return this.keyedData.filter((row) => {
+      return Object.keys(this.columnFilters).reduce((aggregate, columnKey) => {
+        const filterFn = this.columnFilters[columnKey].column.filterFn || FixtableGrid.defaultFilterFn;
+        return aggregate && filterFn(this.columnFilters[columnKey].value, row, this.columnFilters[columnKey].column)
+      }, true)
+    });
+  }
+
   clientSortedData() {
-    try {
+
+      // If we have a new filter column value, re-filter
+      if (this._sortedDataCache.columnFilters !== this.columnFilters) {
+            this._sortedDataCache.data = this.filteredData;
+          this._sortedDataCache.sortDirection = 1;
+          this._sortedDataCache.sortColumn = null;
+          this._sortedDataCache.columnFilters = this.columnFilters;
+
       // Updated the sorted cache if the sort column has changed
-      if (this._sortedDataCache.sortColumn !== this.sortColumn) {
-        let sortMethod = this.sortColumn.compareFn || FixtableGrid._defaultCompareFn;
-        this._sortedDataCache.data = this.keyedData.sort((datum0, datum1) => {
-          return sortMethod(datum0[this.sortColumn.key], datum1[this.sortColumn.key]);
-        });
-        this._sortedDataCache.sortColumn = this.sortColumn;
+      } else if (this.sortColumn && this.sortColumn !== this._sortedDataCache.sortColumn) {
+        try {
+          let sortMethod = this.sortColumn.compareFn || FixtableGrid._defaultCompareFn;
+          this._sortedDataCache.data = this.filteredData.sort((datum0, datum1) => {
+            return sortMethod(datum0[this.sortColumn.key], datum1[this.sortColumn.key]);
+          });
+          this._sortedDataCache.sortColumn = this.sortColumn;
+        } catch (e) {
+          console.error(`Could not sort by ${this.sortColumn.key}. Check your compare function.`, e);
+        }
 
       // If they are sorting by the same column but changed direction
       } else if (this._sortedDataCache.sortDirection !== this.sortDirection) {
@@ -131,11 +183,7 @@ export class FixtableGrid {
         this._sortedDataCache.sortDirection = this.sortDirection;
       }
 
-      //
       return this._sortedDataCache.data;
-    } catch (e) {
-      console.error(`Could not sort by ${this.sortColumn.key}. Check your compare function.`, e);
-    }
   }
 
 
@@ -150,11 +198,7 @@ export class FixtableGrid {
   }
 
   processedData() {
-    if (this.sortColumn) {
       return this.clientSortedData()
-    } else {
-      return this.keyedData;
-    }
   }
 
   onColumnHeaderClicked(column: ColumnDef) {
@@ -166,6 +210,14 @@ export class FixtableGrid {
         this.sortDirection = 1;
       }
     }
+  }
+
+  onColumnFilterChange(column: ColumnDef, newValue: string) {
+    //TODO: Check if we're doing client-side filtering, if not pass the filter as a value
+    this.columnFilters = {
+      ...this.columnFilters,
+      [column.key]: {...this.columnFilters[column.key], value: newValue}
+    };
   }
 
 
@@ -204,25 +256,33 @@ export class FixtableGrid {
             <thead>
               {/** Column Labels **/}
               <tr class="fixtable-column-headers">
-                {options.rowSelection ?
-                  options.checkBoxHeaderElement()
-                  : null
-                }
                 {
                   columns.map((column) => {
                     return (
                       <th
                         >
-                        <span onClick={()=>{this.onColumnHeaderClicked(column)}}>
+                        <div onClick={()=>{this.onColumnHeaderClicked(column)}}>
                           {/* Put the sorting logic back into the logic above*/}
                           {column.label || column.key}
-                        </span>
+                        </div>
                       </th>
                     )
                   })
                 }
               </tr>
               {/** Column Filters **/}
+              {
+                this.columns.map((column) =>
+                  <th>
+                    {
+                      this.columnFilters[column.key] ?
+                        <input value={this.columnFilters[column.key].value} type="text" onInput={(e) => {this.onColumnFilterChange(column, (e as any).target.value)}
+                        }/>
+                        : null
+                    }
+                  </th>
+                )
+              }
               <tr>
 
               </tr>
