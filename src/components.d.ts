@@ -8,11 +8,11 @@ import '@stencil/core';
 
 
 import {
-  ColumnDef,
+  Column,
   ComponentFactory,
 } from './components/fixtable-grid/fixtable-grid';
 import {
-  ColumnDef as ColumnDef2,
+  Column as Column2,
   FixtableOptions,
 } from './components/fixtable-grid/fixtable-grid';
 
@@ -37,7 +37,7 @@ declare global {
     }
 
     interface FixtableCell {
-      'column': ColumnDef;
+      'column': Column;
       'componentFactory': ComponentFactory;
       'row': any;
     }
@@ -47,7 +47,7 @@ declare global {
     }
 
     interface FixtableGrid {
-      'columns': ColumnDef[];
+      'columns': Column[];
       'data': any[];
       'options': FixtableOptions;
     }
@@ -103,7 +103,7 @@ declare global {
     }
 
     export interface FixtableCellAttributes extends HTMLAttributes {
-      'column'?: ColumnDef;
+      'column'?: Column;
       'componentFactory'?: ComponentFactory;
       'row'?: any;
     }
@@ -113,7 +113,7 @@ declare global {
     }
 
     export interface FixtableGridAttributes extends HTMLAttributes {
-      'columns'?: ColumnDef[];
+      'columns'?: Column[];
       'data'?: any[];
       'options'?: FixtableOptions;
     }

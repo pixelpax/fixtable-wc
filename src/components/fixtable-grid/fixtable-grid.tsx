@@ -2,7 +2,7 @@ import {Component, Prop, Element, State} from '@stencil/core';
 import {VNode} from "@stencil/core/dist/declarations";
 import Fixtable from 'fixtable/dist/fixtable';
 
-export interface ColumnDef {
+export interface Column {
   key: string;
   label?: string;
   cellComponentFactory?: ComponentFactory;
@@ -42,11 +42,11 @@ export const defaultFixtableOptions = {
   rowSelection: false,
 
   // EXAMPLE: How you'd write the table cell if inserting directly into the
-  // cellComponentFactory: (row: any, column: ColumnDef) => {
+  // cellComponentFactory: (row: any, column: Column) => {
   //   return <span>{row[column.key]}</span>
   // }
   // TODO: Rename lose factory
-  cellComponentFactory: (row: any, column: ColumnDef) => {
+  cellComponentFactory: (row: any, column: Column) => {
     let newCell =  document.createElement('span');
     newCell.innerText = row[column.key];
     return newCell;
@@ -55,7 +55,7 @@ export const defaultFixtableOptions = {
 
 type ColumnFilter = {
   value: any;
-  column: ColumnDef;
+  column: Column;
 };
 
 
@@ -71,7 +71,7 @@ export class FixtableGrid {
   _fixtable: any;
   private _sortedDataCache: {
     data: any[];
-    sortColumn: ColumnDef;
+    sortColumn: Column;
     sortDirection: number;
     columnFilters: {[key:string]: ColumnFilter};
   } = {
@@ -83,13 +83,13 @@ export class FixtableGrid {
 
   private nextRowKey: number;
 
-  @State() sortColumn: ColumnDef;
+  @State() sortColumn: Column;
   @State() sortDirection: number; // 1 will sort low-to-high, -1 will sort high-to-low
   @State() columnFilters: {[key:string]: ColumnFilter} = {};
 
   @Prop() data: any[];
   @Prop() options: FixtableOptions;
-  @Prop() columns: ColumnDef[];
+  @Prop() columns: Column[];
   @Element() element: HTMLElement;
 
   // TODO: Get rid of underscores for private methods and attributes
@@ -120,7 +120,7 @@ export class FixtableGrid {
     this.nextRowKey = 0;
 
     // Initialize filter models for filterable columns
-    this.columns.forEach((column: ColumnDef) => {
+    this.columns.forEach((column: Column) => {
       if (column.filterable) {
         this.columnFilters[column.key] = {
           column,
@@ -139,7 +139,7 @@ export class FixtableGrid {
       return x > y ? 1 : -1;
   }
 
-  static defaultFilterFn(filterValue: any, row: any, column: ColumnDef) {
+  static defaultFilterFn(filterValue: any, row: any, column: Column) {
     if (filterValue && typeof filterValue === 'string') {
       return row[column.key] && row[column.key].includes(filterValue)
     } else {
@@ -201,7 +201,7 @@ export class FixtableGrid {
       return this.clientSortedData()
   }
 
-  onColumnHeaderClicked(column: ColumnDef) {
+  onColumnHeaderClicked(column: Column) {
     if(column.sortable) {
       if (this.sortColumn === column) {
         this.sortDirection = -this.sortDirection;
@@ -212,7 +212,7 @@ export class FixtableGrid {
     }
   }
 
-  onColumnFilterChange(column: ColumnDef, newValue: string) {
+  onColumnFilterChange(column: Column, newValue: string) {
     //TODO: Check if we're doing client-side filtering, if not pass the filter as a value
     this.columnFilters = {
       ...this.columnFilters,
