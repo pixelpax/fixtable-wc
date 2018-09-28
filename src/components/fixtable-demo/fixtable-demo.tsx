@@ -4,7 +4,7 @@ import { getDemoData } from "./fixtable-demo.data";
 const data = getDemoData();
 
 const example1 = {
-  data: data,
+  rows: data,
   columns: [
     {
       key: 'name',
@@ -26,7 +26,7 @@ const example1 = {
 };
 
 const example2 = {
-  data: data,
+  rows: data,
   columns: [
     {
       key: 'name',
@@ -56,7 +56,7 @@ export class FixtableDemo {
   data1: any[];
 
   componentWillLoad() {
-    this.data1 = example1.data;
+    this.data1 = example1.rows;
   }
 
   addAdditionalRow() {
@@ -92,7 +92,7 @@ export class FixtableDemo {
             <fixtable-grid
               columns={example1.columns}
               options={example1.options}
-              data={example1.data}
+              rows={example1.rows}
             ></fixtable-grid>
           </div>
         </div>
@@ -103,7 +103,7 @@ export class FixtableDemo {
             <fixtable-grid
               columns={example2.columns}
               options={example2.options}
-              data={example2.data}
+              rows={example2.rows}
             ></fixtable-grid>
           </div>
         </div>

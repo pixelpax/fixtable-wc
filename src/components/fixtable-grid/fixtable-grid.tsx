@@ -34,6 +34,7 @@ export interface FixtableOptions {
   rowSelection?: boolean;
   checkBoxHeader?: () => Element;
   cellComponentFactory?: ComponentFactory;
+  onUpdate?: () => {entities: any[]}
 }
 
 export const defaultFixtableOptions = {
@@ -70,12 +71,12 @@ export class FixtableGrid {
 
   _fixtable: any;
   private _sortedDataCache: {
-    data: any[];
+    rows: any[];
     sortColumn: Column;
     sortDirection: number;
     columnFilters: {[key:string]: ColumnFilter};
   } = {
-    data: [],
+    rows: [],
     sortColumn: null,
     sortDirection: 1,
     columnFilters: {}
@@ -83,11 +84,13 @@ export class FixtableGrid {
 
   private nextRowKey: number;
 
-  @State() sortColumn: Column;
-  @State() sortDirection: number; // 1 will sort low-to-high, -1 will sort high-to-low
-  @State() columnFilters: {[key:string]: ColumnFilter} = {};
+  sortColumn: Column;
+  sortDirection: number; // 1 will sort low-to-high, -1 will sort high-to-low
+  columnFilters: {[key:string]: ColumnFilter} = {};
+  @State() isLoading: boolean = false;
+  @State() displayedRows: any;
 
-  @Prop() data: any[];
+  @Prop() rows: any[];
   @Prop() options: FixtableOptions;
   @Prop() columns: Column[];
   @Element() element: HTMLElement;
@@ -129,6 +132,12 @@ export class FixtableGrid {
       }
     });
 
+    // If server-driven, run update and toggle isLoading
+    if (this.options.onUpdate) {
+      this.isLoading = true;
+    } else {
+      this.displayedRows = this.rows;
+    }
   }
 
   componentDidLoad() {
@@ -156,11 +165,11 @@ export class FixtableGrid {
     });
   }
 
-  clientSortedData() {
+  clientProcessedRows() {
 
       // If we have a new filter column value, re-filter
       if (this._sortedDataCache.columnFilters !== this.columnFilters) {
-            this._sortedDataCache.data = this.filteredData;
+            this._sortedDataCache.rows = this.filteredData;
           this._sortedDataCache.sortDirection = 1;
           this._sortedDataCache.sortColumn = null;
           this._sortedDataCache.columnFilters = this.columnFilters;
@@ -169,7 +178,7 @@ export class FixtableGrid {
       } else if (this.sortColumn && this.sortColumn !== this._sortedDataCache.sortColumn) {
         try {
           let sortMethod = this.sortColumn.compareFn || FixtableGrid._defaultCompareFn;
-          this._sortedDataCache.data = this.filteredData.sort((datum0, datum1) => {
+          this._sortedDataCache.rows = this.filteredData.sort((datum0, datum1) => {
             return sortMethod(datum0[this.sortColumn.key], datum1[this.sortColumn.key]);
           });
           this._sortedDataCache.sortColumn = this.sortColumn;
@@ -179,16 +188,16 @@ export class FixtableGrid {
 
       // If they are sorting by the same column but changed direction
       } else if (this._sortedDataCache.sortDirection !== this.sortDirection) {
-        this._sortedDataCache.data = this._sortedDataCache.data.reverse();
+        this._sortedDataCache.rows = this._sortedDataCache.rows.reverse();
         this._sortedDataCache.sortDirection = this.sortDirection;
       }
 
-      return this._sortedDataCache.data;
+      return this._sortedDataCache.rows;
   }
 
 
   get keyedData() {
-    return this.data.map((row) => {
+    return this.rows.map((row) => {
       if (!row._fixtableKey) {
         row._fixtableKey = this.nextRowKey;
         this.nextRowKey++;
@@ -197,8 +206,12 @@ export class FixtableGrid {
     });
   }
 
-  processedData() {
-      return this.clientSortedData()
+  updateRows() {
+    if (this.options.onUpdate) {
+
+    } else {
+      this.displayedRows = [...this.clientProcessedRows()];
+    }
   }
 
   onColumnHeaderClicked(column: Column) {
@@ -210,6 +223,8 @@ export class FixtableGrid {
         this.sortDirection = 1;
       }
     }
+
+    this.updateRows()
   }
 
   onColumnFilterChange(column: Column, newValue: string) {
@@ -218,6 +233,8 @@ export class FixtableGrid {
       ...this.columnFilters,
       [column.key]: {...this.columnFilters[column.key], value: newValue}
     };
+
+    this.updateRows();
   }
 
 
@@ -230,7 +247,6 @@ export class FixtableGrid {
     let {columnFilters} = options;
     columnFilters = columnFilters || [];
 
-    let pd = this.processedData();
 
     return (
       <div class={'fixtable '
@@ -291,7 +307,7 @@ export class FixtableGrid {
 
             {/** Table Rows **/}
             {
-              pd.map((row) =>
+              this.displayedRows.map((row) =>
                 <tr key={row._fixtableKey}>
                   {
                     columns.map((col /*(, colIndex)*/) => {

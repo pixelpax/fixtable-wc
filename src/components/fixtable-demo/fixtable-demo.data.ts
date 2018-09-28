@@ -109,7 +109,7 @@ export const getDemoData = () => {
     { name: 'Robert Baratheon', address: 'House Baratheon', alignment: 'Neutral' },
     { name: 'Khal Drogo', address: 'Dothraki', alignment: 'Neutral' }
   ];
-  // data.forEach((datum, index) => {
+  // rows.forEach((datum, index) => {
   //   datum.id = index;
   // });
   return data;

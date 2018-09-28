@@ -48,8 +48,8 @@ declare global {
 
     interface FixtableGrid {
       'columns': Column[];
-      'data': any[];
       'options': FixtableOptions;
+      'rows': any[];
     }
   }
 
@@ -114,8 +114,8 @@ declare global {
 
     export interface FixtableGridAttributes extends HTMLAttributes {
       'columns'?: Column[];
-      'data'?: any[];
       'options'?: FixtableOptions;
+      'rows'?: any[];
     }
   }
 
