@@ -26,7 +26,7 @@ const example1 = {
 };
 
 const example2 = {
-  rows: data,
+  rows: [],
   columns: [
     {
       key: 'name',
@@ -41,7 +41,12 @@ const example2 = {
     }
   ],
   options: {
-    fixtableClass: "restrict-height"
+    fixtableClass: "restrict-height",
+    onUpdate() {
+      return new Promise<{entities:any[]}>((resolve) => {
+        setTimeout(() => resolve({entities: data}), 5000);
+      });
+    }
   }
 };
 
@@ -86,7 +91,7 @@ export class FixtableDemo {
     return (
       <div>
         <h3>Simple Example</h3>
-        <p>This Fixtable loads and renders all of its content without any pagination or filtering.</p>
+        <p>This Fixtable loads and renders all of its content on the client with filtering and sorting.</p>
         <div class="row">
           <div class="col-md-8">
             <fixtable-grid
@@ -97,7 +102,7 @@ export class FixtableDemo {
           </div>
         </div>
         <h3></h3>
-        <p>This Fixtable loads all of its content at once but paginates it on the client.</p>
+        <p>This Fixtable loads content asynchronously with pagination.</p>
         <div class="row">
           <div class="col-md-8">
             <fixtable-grid

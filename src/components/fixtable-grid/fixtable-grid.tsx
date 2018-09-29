@@ -27,6 +27,18 @@ export type DOMElementFactory = (...args: any[]) => HTMLElement;
 export type ComponentFactory = JSXFactory |
                                DOMElementFactory
 
+export interface OnUpdateResponse {
+  entities: any[]
+}
+
+export interface OnUpdateParameters {
+  // pageNumber?: number;
+  // pageSize?: number;
+  filters?: {[key: string]: string}
+  sortBy?: string;
+  sortDirection?: string;
+}
+
 export interface FixtableOptions {
   fixtableClass?: string;
   tableClass?: string;
@@ -34,7 +46,9 @@ export interface FixtableOptions {
   rowSelection?: boolean;
   checkBoxHeader?: () => Element;
   cellComponentFactory?: ComponentFactory;
-  onUpdate?: () => {entities: any[]}
+  //TODO: Fix this to be strictly typed
+  // onUpdate?: <T extends OnUpdateResponse>(onUpdateParameters?: OnUpdateParameters) => Promise<T>;
+  onUpdate?: (onUpdateParameters?: OnUpdateParameters) => Promise<OnUpdateResponse>;
 }
 
 export const defaultFixtableOptions = {
@@ -87,8 +101,11 @@ export class FixtableGrid {
   sortColumn: Column;
   sortDirection: number; // 1 will sort low-to-high, -1 will sort high-to-low
   columnFilters: {[key:string]: ColumnFilter} = {};
+  pageNumber:  number;
+
+
   @State() isLoading: boolean = false;
-  @State() displayedRows: any;
+  @State() displayedRows: any = [];
 
   @Prop() rows: any[];
   @Prop() options: FixtableOptions;
@@ -134,7 +151,7 @@ export class FixtableGrid {
 
     // If server-driven, run update and toggle isLoading
     if (this.options.onUpdate) {
-      this.isLoading = true;
+      this.updateRows()
     } else {
       this.displayedRows = this.rows;
     }
@@ -208,7 +225,22 @@ export class FixtableGrid {
 
   updateRows() {
     if (this.options.onUpdate) {
+      let filters = {};
+      filters = Object.keys(this.columnFilters).map((columnKey) => {
+        filters[columnKey] = this.columnFilters[columnKey].value;
+      });
+      const sortDirection = this.sortDirection === 1 ? 'asc' : 'desc';
 
+      let sortBy;
+      if (this.sortColumn) {
+        sortBy = this.sortColumn.key;
+      }
+      this.isLoading = true;
+      this.options.onUpdate({filters, sortBy, sortDirection})
+        .then((onUpdateReponse) => {
+          this.displayedRows = onUpdateReponse.entities;
+          this.isLoading = false;
+        })
     } else {
       this.displayedRows = [...this.clientProcessedRows()];
     }
@@ -237,6 +269,10 @@ export class FixtableGrid {
     this.updateRows();
   }
 
+  onChangePageNumber(newPageNumber: string) {
+    this.pageNumber = Number(newPageNumber);
+    this.updateRows();
+  }
 
   render() {
 
@@ -287,53 +323,66 @@ export class FixtableGrid {
                 }
               </tr>
               {/** Column Filters **/}
+              <tr class="fixtable-column-filters">
               {
                 this.columns.map((column) =>
                   <th>
+                    <div>
                     {
                       this.columnFilters[column.key] ?
                         <input value={this.columnFilters[column.key].value} type="text" onInput={(e) => {this.onColumnFilterChange(column, (e as any).target.value)}
                         }/>
                         : null
                     }
+                    </div>
                   </th>
                 )
               }
-              <tr>
-
               </tr>
             </thead>
-            <tbody>
 
             {/** Table Rows **/}
-            {
-              this.displayedRows.map((row) =>
+             <tbody>
+             {
+               this.displayedRows.map((row) =>
                 <tr key={row._fixtableKey}>
-                  {
-                    columns.map((col /*(, colIndex)*/) => {
-                      return (
-                        <td>
-                          <fixtable-cell
-                            componentFactory={
-                              col.cellComponentFactory ?
-                                col.cellComponentFactory :
-                                options.cellComponentFactory
-                            }
-                            row={row}
-                            column={col}
-                          >
-                          </fixtable-cell>
-                        </td>
-                      )
-                    })
-                  }
-                </tr>
-              )
-            }
-            </tbody>
+                {
+                  columns.map((col /*(, colIndex)*/) => {
+                    return (
+                      <td>
+                        <fixtable-cell
+                          componentFactory={
+                            col.cellComponentFactory ?
+                              col.cellComponentFactory :
+                              options.cellComponentFactory
+                          }
+                          row={row}
+                          column={col}
+                        >
+                        </fixtable-cell>
+                      </td>
+                    )
+                  })
+                }
+               </tr>
+               )
+             }
+             </tbody>
           </table>
         </div>
+        {
+          this.isLoading ?
+            <div class="fixtable-centered">
+              <span>Loading!</span>
+            </div>
+            : null
+        }
         <div class='fixtable-footer'>
+          <button style={{visibility: this.pageNumber === 0 ? 'hidden' : 'auto'}}>Previous</button>
+          <input onInput={(e: any)=>{this.onChangePageNumber(e.target.value)}} value={this.pageNumber} type="text" />
+          {
+            <button>Next</button>
+          }
         </div>
       </div>
     );
