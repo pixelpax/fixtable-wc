@@ -1,6 +1,9 @@
 import {Component, Prop} from '@stencil/core';
 import {ComponentFactory} from "../fixtable-grid/fixtable-grid";
-import {VNode} from "@stencil/core/dist/declarations";
+
+// For some reason this works in sandbox, but stencil doesn't distribute the delcaration
+// import {VNode} from "@stencil/core/dist/declarations";
+type VNode = any;
 
 
 @Component({

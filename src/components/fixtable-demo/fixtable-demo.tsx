@@ -1,5 +1,6 @@
 import {Component, State} from '@stencil/core';
 import { getDemoData } from "./fixtable-demo.data";
+import {OnUpdateResponse} from "../fixtable-grid/fixtable-grid";
 
 const data = getDemoData();
 
@@ -43,8 +44,8 @@ const example2 = {
   options: {
     fixtableClass: "restrict-height",
     onUpdate() {
-      return new Promise<{entities:any[]}>((resolve) => {
-        setTimeout(() => resolve({entities: data}), 5000);
+      return new Promise<OnUpdateResponse>((resolve) => {
+        setTimeout(() => resolve({entities: data, totalPages: data.length}), 5000);
       });
     }
   }

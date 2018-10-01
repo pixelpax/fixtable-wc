@@ -1,6 +1,9 @@
 import {Component, Prop, Element, State} from '@stencil/core';
-import {VNode} from "@stencil/core/dist/declarations";
 import Fixtable from 'fixtable/dist/fixtable';
+
+// For some reason this works in sandbox, but stencil doesn't distribute the delcaration
+// import {VNode} from "@stencil/core/dist/declarations";
+type VNode = any;
 
 export interface Column {
   key: string;
@@ -13,6 +16,7 @@ export interface Column {
   defaultFilterValue?: any;
   filterable?: boolean;
 }
+
 
 export type JSXFactory = (...args: any[]) => VNode;
 export type DOMElementFactory = (...args: any[]) => HTMLElement;
@@ -29,11 +33,12 @@ export type ComponentFactory = JSXFactory |
 
 export interface OnUpdateResponse {
   entities: any[]
+  totalPages: number;
 }
 
 export interface OnUpdateParameters {
-  // pageNumber?: number;
-  // pageSize?: number;
+  pageNumber?: number;
+  pageSize?: number;
   filters?: {[key: string]: string}
   sortBy?: string;
   sortDirection?: string;
@@ -46,6 +51,7 @@ export interface FixtableOptions {
   rowSelection?: boolean;
   checkBoxHeader?: () => Element;
   cellComponentFactory?: ComponentFactory;
+  pageSizeChoices?: number[];
   //TODO: Fix this to be strictly typed
   // onUpdate?: <T extends OnUpdateResponse>(onUpdateParameters?: OnUpdateParameters) => Promise<T>;
   onUpdate?: (onUpdateParameters?: OnUpdateParameters) => Promise<OnUpdateResponse>;
@@ -55,6 +61,7 @@ export const defaultFixtableOptions = {
   fixtableClass: '',
   tableClass: '',
   rowSelection: false,
+  pageSizeChoices: [10, 25, 50, 100],
 
   // EXAMPLE: How you'd write the table cell if inserting directly into the
   // cellComponentFactory: (row: any, column: Column) => {
@@ -101,7 +108,9 @@ export class FixtableGrid {
   sortColumn: Column;
   sortDirection: number; // 1 will sort low-to-high, -1 will sort high-to-low
   columnFilters: {[key:string]: ColumnFilter} = {};
-  pageNumber:  number;
+  pageNumber:  number = 1;
+  pageSize: number = 25;
+  totalPages: number = null;
 
 
   @State() isLoading: boolean = false;
@@ -136,6 +145,9 @@ export class FixtableGrid {
   }
 
   componentWillLoad() {
+
+    // TODO: Validate Props
+
     // Set some initial values
     this.nextRowKey = 0;
 
@@ -235,9 +247,11 @@ export class FixtableGrid {
       if (this.sortColumn) {
         sortBy = this.sortColumn.key;
       }
+
       this.isLoading = true;
-      this.options.onUpdate({filters, sortBy, sortDirection})
+      this.options.onUpdate({filters, sortBy, sortDirection, pageSize: this.pageSize})
         .then((onUpdateReponse) => {
+          this.totalPages = onUpdateReponse.totalPages ? onUpdateReponse.totalPages : null;
           this.displayedRows = onUpdateReponse.entities;
           this.isLoading = false;
         })
@@ -272,6 +286,24 @@ export class FixtableGrid {
   onChangePageNumber(newPageNumber: string) {
     this.pageNumber = Number(newPageNumber);
     this.updateRows();
+  }
+
+  onNextPage() {
+    this.pageNumber++;
+    this.updateRows();
+  }
+
+  onPreviousPage() {
+    this.pageNumber--;
+    this.updateRows();
+  }
+
+  get onLastPage() {
+    if (this.totalPages !== null) {
+      return this.pageNumber === this.totalPages;
+    } else {
+      return false;
+    }
   }
 
   render() {
@@ -342,6 +374,8 @@ export class FixtableGrid {
             </thead>
 
             {/** Table Rows **/}
+            {
+              !this.isLoading ?
              <tbody>
              {
                this.displayedRows.map((row) =>
@@ -368,6 +402,8 @@ export class FixtableGrid {
                )
              }
              </tbody>
+              : null
+            }
           </table>
         </div>
         {
@@ -378,11 +414,10 @@ export class FixtableGrid {
             : null
         }
         <div class='fixtable-footer'>
-          <button style={{visibility: this.pageNumber === 0 ? 'hidden' : 'auto'}}>Previous</button>
+          <button onClick={() => this.onPreviousPage()} style={{visibility: this.pageNumber === 1 ? 'hidden' : 'auto'}}>Previous</button>
           <input onInput={(e: any)=>{this.onChangePageNumber(e.target.value)}} value={this.pageNumber} type="text" />
-          {
-            <button>Next</button>
-          }
+          {/* TODO: Monitor the total page count */}
+          <button onClick={() => this.onNextPage()} style={{visibility: this.onLastPage ? 'hidden' : 'auto'}}>Next</button>
         </div>
       </div>
     );
