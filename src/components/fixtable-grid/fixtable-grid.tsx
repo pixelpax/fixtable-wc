@@ -248,8 +248,10 @@ export class FixtableGrid {
         sortBy = this.sortColumn.key;
       }
 
+      const {pageSize, pageNumber} = this;
+
       this.isLoading = true;
-      this.options.onUpdate({filters, sortBy, sortDirection, pageSize: this.pageSize})
+      this.options.onUpdate({filters, sortBy, sortDirection, pageSize, pageNumber})
         .then((onUpdateReponse) => {
           this.totalPages = onUpdateReponse.totalPages ? onUpdateReponse.totalPages : null;
           this.displayedRows = onUpdateReponse.entities;
