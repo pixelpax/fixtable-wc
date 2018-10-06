@@ -420,13 +420,11 @@ export class FixtableGrid {
         }
         <div class="fixtable-footer">
           <button onClick={() => this.onPreviousPage()} style={{visibility: this.pageNumber === 1 ? 'hidden' : 'visible'}}>Previous</button>
-          {/*<input onInput={(e: any)=>{this.onChangePageNumber(e.target.value)}} value={this.pageNumber} type="text" />*/}
           {
             pageNumbers.map((i) => {
               return <span class="page-number" onClick={this.onChangePageNumber.bind(this, i)}>{i}</span>
             })
           }
-          {/* TODO: Monitor the total page count */}
           <button onClick={() => this.onNextPage()} style={{visibility: this.pageNumber === this.lastPage ? 'hidden' : 'visible'}}>Next</button>
         </div>
       </div>
