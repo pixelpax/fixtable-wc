@@ -282,6 +282,7 @@ export class FixtableGrid {
   }
 
   onChangePageNumber(newPageNumber: string) {
+
     this.pageNumber = Number(newPageNumber);
     this.updateRows();
   }
@@ -296,12 +297,8 @@ export class FixtableGrid {
     this.updateRows();
   }
 
-  get onLastPage() {
-    if (this.total !== null) {
-      return this.pageNumber === this.total;
-    } else {
-      return false;
-    }
+  get lastPage() {
+    return this.total ? Math.ceil(this.total/this.pageSize) : 1;
   }
 
   render() {
@@ -313,7 +310,13 @@ export class FixtableGrid {
     let {columnFilters} = options;
     columnFilters = columnFilters || [];
 
-    const pageNumbers = [...Array(Math.ceil(this.total / this.pageSize || 0)).keys()];
+    // Convoluted way of getting a list of integers from 1..N
+    let pageNumbers;
+    if (this.lastPage === 1) {
+      pageNumbers = [];
+    } else {
+      pageNumbers = [...Array(this.lastPage+1).keys()].slice(1);
+    }
 
     return (
       <div class={'fixtable fixtable-purecloud '
@@ -415,16 +418,16 @@ export class FixtableGrid {
             </div>
             : null
         }
-        <div class='fixtable-footer'>
-          <button onClick={() => this.onPreviousPage()} style={{visibility: this.pageNumber === 1 ? 'hidden' : 'auto'}}>Previous</button>
+        <div class="fixtable-footer">
+          <button onClick={() => this.onPreviousPage()} style={{visibility: this.pageNumber === 1 ? 'hidden' : 'visible'}}>Previous</button>
           {/*<input onInput={(e: any)=>{this.onChangePageNumber(e.target.value)}} value={this.pageNumber} type="text" />*/}
           {
             pageNumbers.map((i) => {
-              return <span onClick={this.onChangePageNumber.bind(this, i)}>{i}</span>
+              return <span class="page-number" onClick={this.onChangePageNumber.bind(this, i)}>{i}</span>
             })
           }
           {/* TODO: Monitor the total page count */}
-          <button onClick={() => this.onNextPage()} style={{visibility: this.onLastPage ? 'hidden' : 'auto'}}>Next</button>
+          <button onClick={() => this.onNextPage()} style={{visibility: this.pageNumber === this.lastPage ? 'hidden' : 'visible'}}>Next</button>
         </div>
       </div>
     );
