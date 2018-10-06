@@ -45,7 +45,7 @@ const example2 = {
     fixtableClass: "restrict-height",
     onUpdate() {
       return new Promise<OnUpdateResponse>((resolve) => {
-        setTimeout(() => resolve({entities: data, totalPages: data.length}), 5000);
+        setTimeout(() => resolve({entities: data, total: data.length}), 5000);
       });
     }
   }

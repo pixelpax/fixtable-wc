@@ -1,3 +1,406 @@
+/*
+This is the original CSS from fixtable-core
+ */
+
+.fixtable {
+  margin: 0 auto;
+  position: relative;
+  height: 100%;
+}
+
+.fixtable * {
+  box-sizing: border-box;
+}
+
+.fixtable-inner {
+  overflow: auto;
+  max-height: 100%;
+}
+
+.fixtable table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.fixtable thead th {
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.fixtable thead th > div {
+  position: absolute;
+  top: 0;
+}
+
+.fixtable-column-filters input,
+.fixtable-column-filters select {
+  width: 100%;
+}
+
+.fixtable-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.fixtable-filters {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.fixtable-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.fixtable-centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.fixtable-cell-editing input {
+  width: 100%;
+}
+
+.fixtable-sortable-column-header {
+  cursor: pointer;
+}
+
+.fixtable-caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 4px dashed;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
+
+.fixtable-caret-reversed {
+  border-top: 0;
+  border-bottom: 4px solid;
+}
+
+.fixtable-footer {
+
+}
+
+/* End original fixtable-core css */
+
+  $pc-lightgrey:                          #f6f6f6;
+  $pc-concrete:                           #f2f2f2;
+  $pc-white:                              #ffffff;
+  $pc-lightblue:                          #e5eff1;
+  $pc-blue:                               #56aac6;
+
+  $font-color:                            #4c4c4c;
+
+  $pc-fixtable-border-color:              #ccc;
+  $pc-fixtable-header-color:              $pc-concrete;
+  $pc-fixtable-header-top-border:         #dcdcdc;
+  $pc-fixtable-page-button-active-color:  #d6d6d6;
+  $pc-fixtable-page-button-border-color:  #ccc;
+  $pc-fixtable-row-toggle-text-color:     #777;
+  $pc-fixtable-filter-bg:                 #cfdfe5;
+
+  .fixtable-header {
+    border-width: 1px 0px 0px 0px;
+    border-style: solid;
+    border-color: $pc-fixtable-border-color;
+  }
+  .fixtable-row {
+    border-bottom: 0.1rem solid $pc-fixtable-border-color;
+  }
+  .fixtable-inner {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    overflow: auto;
+    border-color: $pc-fixtable-border-color;
+  }
+
+  .fixtable-filters {
+    background-color: $pc-lightgrey;
+    border: 0.1rem solid $pc-fixtable-border-color;
+    border-top: none;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+  .search-field {
+    width: 50%;
+    margin-left: 25%;
+  }
+  .search-field-left {
+    width: 25%;
+    margin-left: 0;
+    margin-right: 25%;
+  }
+  .fixtable-item-range {
+    color: $font-color;
+    float: right;
+    margin-top: 1px;
+    text-align: right;
+    width: 25%;
+  }
+
+  .fixtable-header {
+    background-color: $pc-lightgrey;
+    background-image: linear-gradient(to bottom, $pc-white 0%, $pc-lightgrey 100%);
+    border-top: solid 0.2rem $pc-fixtable-header-top-border;
+    border-right: solid 0.1rem $pc-fixtable-page-button-border-color;
+    border-bottom: solid 0.2rem $pc-fixtable-border-color;
+    border-left: solid 0.1rem $pc-fixtable-page-button-border-color;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+  }
+
+  .fixtable-toolbar {
+    background-color: $pc-white;
+    background-image: none;
+    border: none;
+    padding: 0 0 1.6rem 1rem;
+
+    .search-field {
+      width: 50%;
+      margin-left: 25%;
+    }
+    .fixtable-item-range {
+      color: $font-color;
+      float: right;
+      margin-top: 1px;
+      text-align: right;
+      width: 25%;
+    }
+  }
+
+  .fixtable-grid {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .fixtable-column-headers {
+      border-style:none;
+
+      div{
+        border-bottom-style: none;
+        border-bottom-width: 0px;
+      }
+    }
+    .clickable {
+      border-style: solid;
+      border-color: $pc-lightgrey;
+      border-width: 1px 1px 0px 1px;
+    }
+
+    .fixtable-footer {
+      background: $pc-lightgrey;
+
+      .fixtable-item-range{
+        padding-right: 1rem;
+      }
+    }
+
+    .fixtable {
+      display: flex;
+      flex-basis: 0;
+      flex-direction: column;
+      flex-grow: 1;
+      flex-shrink: 1;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .fixtable-inner {
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: 0;
+      overflow: auto;
+      border-color: $pc-fixtable-border-color;
+      table {
+        table-layout: auto !important;
+      }
+
+      table tbody tr:hover {
+        background-color: $pc-lightblue;
+
+        td:first-child {
+          position: relative;
+        }
+
+        td:first-child:before {
+          content: '';
+          background: $pc-blue;
+          display: block;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          position: absolute;
+          width: .4rem;
+        }
+      }
+    }
+
+    .caret-up {
+      border-bottom: 0;
+      &::after, &::before {
+        content: none;
+      }
+    }
+
+    .fixtable-table {
+      margin: 0px 0px 0px;
+    }
+  }
+
+  .fixtable-purecloud {
+    margin-bottom: 6px !important;
+
+    .fixtable-header {
+      background-image: none;
+      background-color: $pc-fixtable-header-color;
+      border-color: $pc-fixtable-border-color;
+    }
+    .fixtable-filters {
+      border: none;
+    }
+    .fixtable-column-headers {
+      th {
+        font-weight: normal;
+        font-size: 13px;
+        padding: 5px 6px 3px;
+        vertical-align: bottom;
+      }
+
+      .caret {
+        border: 0;
+        transform: none !important;
+        &::before {
+          border: 0;
+          font-family: FontAwesome;
+          font-size: 0.8em;
+          position: relative;
+          bottom: 1.1em;
+          left: 0.5em;
+          content: "\f078";
+        }
+        &.caret-up::before {
+          content: '\f077'
+        }
+      }
+    }
+    .fixtable-row {
+      border-bottom: 0.1rem solid $pc-fixtable-border-color;
+
+      &.active td {
+        background: $pc-lightblue;
+      }
+
+      &.expanded.fixtable-row-primary {
+        border-bottom-style: none;
+      }
+
+      td {
+        border-top:none;
+        padding: 8px 6px;
+
+        button {
+          margin: 0px;
+        }
+
+        .enabled-icon {
+          display: flex;
+
+          .svg-icon {
+            font-size: 18px;
+          }
+        }
+      }
+
+      &.fixtable-row-primary.expanded:hover,
+      &.fixtable-row-secondary.expanded:hover {
+        background: transparent;
+      }
+    }
+    .fixtable-row-toggle {
+      color: $pc-fixtable-row-toggle-text-color;
+      font-size: 15px;
+      top: 0;
+      position: relative;
+
+    }
+    .fixtable-footer {
+      background: $pc-white;
+      border-top: 1px solid $pc-fixtable-border-color;
+      border-right: none;
+      border-bottom: none;
+      border-left: none;
+      padding-bottom: 0;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+
+      .svg-icon {
+        margin-right: 5px;
+      }
+    }
+
+    &.fixtable-purecloud-center-vertical {
+      tbody td {
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .fixtable-short {
+    height: calc(50% - 15px);
+  }
+
+  .fixtable-tall {
+    height: calc(100% - 15px);
+  }
+
+  /* Secondary table inside fixtable row */
+  .fixtable-grid .fixtable-inner table.table.table-equal-columns {
+    table-layout: fixed !important;
+  }
+
+  .tab-content > .active {
+    .fixtable {
+      flex-shrink: 1;
+      flex-grow: 1;
+      flex-basis: 0;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fixtable-inner {
+      flex-grow: 1;
+      flex-shrink: 1;
+      flex-basis: 0;
+      overflow: auto;
+    }
+  }
+
+
+
+/*
+This is the original CSS from fixtable-core
+ */
+
 .fixtable {
   margin: 0 auto;
   position: relative;

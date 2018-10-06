@@ -33,7 +33,7 @@ export type ComponentFactory = JSXFactory |
 
 export interface OnUpdateResponse {
   entities: any[]
-  totalPages: number;
+  total: number;
 }
 
 export interface OnUpdateParameters {
@@ -110,7 +110,7 @@ export class FixtableGrid {
   columnFilters: {[key:string]: ColumnFilter} = {};
   pageNumber:  number = 1;
   pageSize: number = 25;
-  totalPages: number = null;
+  total: number = null;
 
 
   @State() isLoading: boolean = false;
@@ -162,11 +162,8 @@ export class FixtableGrid {
     });
 
     // If server-driven, run update and toggle isLoading
-    if (this.options.onUpdate) {
-      this.updateRows()
-    } else {
-      this.displayedRows = this.rows;
-    }
+    this.updateRows();
+    this.displayedRows = this.rows;
   }
 
   componentDidLoad() {
@@ -196,32 +193,32 @@ export class FixtableGrid {
 
   clientProcessedRows() {
 
-      // If we have a new filter column value, re-filter
-      if (this._sortedDataCache.columnFilters !== this.columnFilters) {
-            this._sortedDataCache.rows = this.filteredData;
-          this._sortedDataCache.sortDirection = 1;
-          this._sortedDataCache.sortColumn = null;
-          this._sortedDataCache.columnFilters = this.columnFilters;
+    // If we have a new filter column value, re-filter
+    if (this._sortedDataCache.columnFilters !== this.columnFilters) {
+        this._sortedDataCache.rows = this.filteredData;
+      this._sortedDataCache.sortDirection = 1;
+      this._sortedDataCache.sortColumn = null;
+      this._sortedDataCache.columnFilters = this.columnFilters;
 
-      // Updated the sorted cache if the sort column has changed
-      } else if (this.sortColumn && this.sortColumn !== this._sortedDataCache.sortColumn) {
-        try {
-          let sortMethod = this.sortColumn.compareFn || FixtableGrid._defaultCompareFn;
-          this._sortedDataCache.rows = this.filteredData.sort((datum0, datum1) => {
-            return sortMethod(datum0[this.sortColumn.key], datum1[this.sortColumn.key]);
-          });
-          this._sortedDataCache.sortColumn = this.sortColumn;
-        } catch (e) {
-          console.error(`Could not sort by ${this.sortColumn.key}. Check your compare function.`, e);
-        }
-
-      // If they are sorting by the same column but changed direction
-      } else if (this._sortedDataCache.sortDirection !== this.sortDirection) {
-        this._sortedDataCache.rows = this._sortedDataCache.rows.reverse();
-        this._sortedDataCache.sortDirection = this.sortDirection;
+    // Updated the sorted cache if the sort column has changed
+    } else if (this.sortColumn && this.sortColumn !== this._sortedDataCache.sortColumn) {
+      try {
+        let sortMethod = this.sortColumn.compareFn || FixtableGrid._defaultCompareFn;
+        this._sortedDataCache.rows = this.filteredData.sort((datum0, datum1) => {
+          return sortMethod(datum0[this.sortColumn.key], datum1[this.sortColumn.key]);
+        });
+        this._sortedDataCache.sortColumn = this.sortColumn;
+      } catch (e) {
+        console.error(`Could not sort by ${this.sortColumn.key}. Check your compare function.`, e);
       }
 
-      return this._sortedDataCache.rows;
+    // If they are sorting by the same column but changed direction
+    } else if (this._sortedDataCache.sortDirection !== this.sortDirection) {
+      this._sortedDataCache.rows = this._sortedDataCache.rows.reverse();
+      this._sortedDataCache.sortDirection = this.sortDirection;
+    }
+
+    return this._sortedDataCache.rows;
   }
 
 
@@ -253,7 +250,7 @@ export class FixtableGrid {
       this.isLoading = true;
       this.options.onUpdate({filters, sortBy, sortDirection, pageSize, pageNumber})
         .then((onUpdateReponse) => {
-          this.totalPages = onUpdateReponse.totalPages ? onUpdateReponse.totalPages : null;
+          this.total = onUpdateReponse.total ? onUpdateReponse.total : null;
           this.displayedRows = onUpdateReponse.entities;
           this.isLoading = false;
         })
@@ -264,15 +261,14 @@ export class FixtableGrid {
 
   onColumnHeaderClicked(column: Column) {
     if(column.sortable) {
-      if (this.sortColumn === column) {
+      if (this.sortColumn && this.sortColumn === column) {
         this.sortDirection = -this.sortDirection;
       } else {
         this.sortColumn = column;
         this.sortDirection = 1;
       }
+      this.updateRows()
     }
-
-    this.updateRows()
   }
 
   onColumnFilterChange(column: Column, newValue: string) {
@@ -301,8 +297,8 @@ export class FixtableGrid {
   }
 
   get onLastPage() {
-    if (this.totalPages !== null) {
-      return this.pageNumber === this.totalPages;
+    if (this.total !== null) {
+      return this.pageNumber === this.total;
     } else {
       return false;
     }
@@ -317,9 +313,10 @@ export class FixtableGrid {
     let {columnFilters} = options;
     columnFilters = columnFilters || [];
 
+    const pageNumbers = [...Array(Math.ceil(this.total / this.pageSize || 0)).keys()];
 
     return (
-      <div class={'fixtable '
+      <div class={'fixtable fixtable-purecloud '
                   + options.fixtableClass + ' '
                   + (columnFilters.length ? 'fixtable-has-filter' : '')}>
 
@@ -331,11 +328,7 @@ export class FixtableGrid {
         {/* Same as above, this will be populated with the contents generated below, but
             placed here in order to be managed by fixtable and not move with the interior
             contents are scrolled */}
-        {columnFilters.length ?
-          <div class="fixtable-filters">
-            {/* TODO: Add filters here*/}
-          </div> : null
-        }
+        <div class="fixtable-filters"></div>
 
         <div class="fixtable-inner">
           <table class={options.tableClass}>
@@ -344,12 +337,19 @@ export class FixtableGrid {
               <tr class="fixtable-column-headers">
                 {
                   columns.map((column) => {
+                    let caretClass = this.sortColumn === column ? 'fixtable-caret' : '';
+                    if (this.sortDirection !== 1) {
+                      caretClass += ' fixtable-caret-reversed';
+                    }
                     return (
                       <th
                         >
                         <div onClick={()=>{this.onColumnHeaderClicked(column)}}>
                           {/* Put the sorting logic back into the logic above*/}
-                          {column.label || column.key}
+                          <span class={caretClass}></span>
+                          <span>
+                            {column.label || column.key}
+                          </span>
                         </div>
                       </th>
                     )
@@ -362,12 +362,12 @@ export class FixtableGrid {
                 this.columns.map((column) =>
                   <th>
                     <div>
-                    {
-                      this.columnFilters[column.key] ?
-                        <input value={this.columnFilters[column.key].value} type="text" onInput={(e) => {this.onColumnFilterChange(column, (e as any).target.value)}
-                        }/>
-                        : null
-                    }
+                      {
+                        column.filterable ?
+                          <input value={this.columnFilters[column.key].value} type="text" onInput={(e) => {this.onColumnFilterChange(column, (e as any).target.value)}
+                          }/>
+                          : null
+                      }
                     </div>
                   </th>
                 )
@@ -417,7 +417,12 @@ export class FixtableGrid {
         }
         <div class='fixtable-footer'>
           <button onClick={() => this.onPreviousPage()} style={{visibility: this.pageNumber === 1 ? 'hidden' : 'auto'}}>Previous</button>
-          <input onInput={(e: any)=>{this.onChangePageNumber(e.target.value)}} value={this.pageNumber} type="text" />
+          {/*<input onInput={(e: any)=>{this.onChangePageNumber(e.target.value)}} value={this.pageNumber} type="text" />*/}
+          {
+            pageNumbers.map((i) => {
+              return <span onClick={this.onChangePageNumber.bind(this, i)}>{i}</span>
+            })
+          }
           {/* TODO: Monitor the total page count */}
           <button onClick={() => this.onNextPage()} style={{visibility: this.onLastPage ? 'hidden' : 'auto'}}>Next</button>
         </div>
