@@ -312,10 +312,9 @@ export class FixtableGrid {
 
     // Convoluted way of getting a list of integers from 1..N
     let pageNumbers;
-    if (this.lastPage === 1) {
-      pageNumbers = [];
-    } else {
-      pageNumbers = [...Array(this.lastPage+1).keys()].slice(1);
+    pageNumbers = [];
+    for (let i = 1; i <= this.lastPage; i++) {
+      pageNumbers.push(i);
     }
 
     return (
