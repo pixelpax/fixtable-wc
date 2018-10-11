@@ -70,7 +70,8 @@ export const defaultFixtableOptions = {
   // TODO: Rename lose factory
   cellComponentFactory: (row: any, column: Column) => {
     let newCell =  document.createElement('span');
-    newCell.innerText = row[column.key];
+    const contents = row[column.key];
+    newCell.innerText = contents ? contents : '';
     return newCell;
   }
 };
@@ -307,8 +308,6 @@ export class FixtableGrid {
 
     // Merge defaults (May want to put this in the onLoad lifecycle hook)
     options = {...defaultFixtableOptions, ...options};
-    let {columnFilters} = options;
-    columnFilters = columnFilters || [];
 
     // Convoluted way of getting a list of integers from 1..N
     let pageNumbers;
@@ -320,7 +319,7 @@ export class FixtableGrid {
     return (
       <div class={'fixtable fixtable-purecloud '
                   + options.fixtableClass + ' '
-                  + (columnFilters.length ? 'fixtable-has-filter' : '')}>
+                  + (Object.keys(this.columnFilters).length ? 'fixtable-has-filter' : '')}>
 
         {/* We keep an empty element here for fixtable-vanilla to inject the headers.
             The properties will be managed by fixtable-vanilla */}
