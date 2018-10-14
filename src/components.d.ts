@@ -14,7 +14,11 @@ import {
 import {
   Column as Column2,
   FixtableOptions,
+  OnUpdateParameters,
 } from './components/fixtable-grid/fixtable-grid';
+import {
+  EventEmitter,
+} from '@stencil/core';
 
 
 declare global {
@@ -50,6 +54,7 @@ declare global {
       'columns': Column[];
       'options': FixtableOptions;
       'rows': any[];
+      'total': number;
     }
   }
 
@@ -114,8 +119,10 @@ declare global {
 
     export interface FixtableGridAttributes extends HTMLAttributes {
       'columns'?: Column[];
+      'onOnPageChange'?: (event: CustomEvent<OnUpdateParameters>) => void;
       'options'?: FixtableOptions;
       'rows'?: any[];
+      'total'?: number;
     }
   }
 

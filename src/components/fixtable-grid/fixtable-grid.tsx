@@ -1,4 +1,4 @@
-import {Component, Prop, Element, State} from '@stencil/core';
+import {Component, Prop, Element, State, Event, EventEmitter} from '@stencil/core';
 import Fixtable from 'fixtable/dist/fixtable';
 
 // For some reason this works in sandbox, but stencil doesn't distribute the delcaration
@@ -111,7 +111,6 @@ export class FixtableGrid {
   columnFilters: {[key:string]: ColumnFilter} = {};
   pageNumber:  number = 1;
   pageSize: number = 25;
-  total: number = null;
 
 
   @State() isLoading: boolean = false;
@@ -120,6 +119,8 @@ export class FixtableGrid {
   @Prop() rows: any[];
   @Prop() options: FixtableOptions;
   @Prop() columns: Column[];
+  @Prop() total: number = null;
+  @Event() onPageChange: EventEmitter<OnUpdateParameters>;
   @Element() element: HTMLElement;
 
   // TODO: Get rid of underscores for private methods and attributes
@@ -165,6 +166,12 @@ export class FixtableGrid {
     // If server-driven, run update and toggle isLoading
     this.updateRows();
     this.displayedRows = this.rows;
+  }
+
+  componentWillUpdate() {
+     this.total = this.total ? this.total : null;
+     this.displayedRows = this.rows;
+     this.isLoading = false;
   }
 
   componentDidLoad() {
@@ -249,12 +256,13 @@ export class FixtableGrid {
       const {pageSize, pageNumber} = this;
 
       this.isLoading = true;
-      this.options.onUpdate({filters, sortBy, sortDirection, pageSize, pageNumber})
-        .then((onUpdateReponse) => {
-          this.total = onUpdateReponse.total ? onUpdateReponse.total : null;
-          this.displayedRows = onUpdateReponse.entities;
-          this.isLoading = false;
-        })
+      this.onPageChange.emit({filters, sortBy, sortDirection, pageSize, pageNumber});
+      // this.options.onUpdate({filters, sortBy, sortDirection, pageSize, pageNumber})
+      //   .then((onUpdateReponse) => {
+      //     this.total = onUpdateReponse.total ? onUpdateReponse.total : null;
+      //     this.displayedRows = onUpdateReponse.entities;
+      //     this.isLoading = false;
+      //   })
     } else {
       this.displayedRows = [...this.clientProcessedRows()];
     }
