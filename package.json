@@ -16,7 +16,8 @@
     "test.watch": "jest --watch"
   },
   "dependencies": {
-    "fixtable": "^2.0.8"
+    "fixtable": "^2.0.8",
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
     "@stencil/core": "^0.11.0",

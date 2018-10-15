@@ -1,4 +1,5 @@
-import {Component, Prop, Element, State, Event, EventEmitter} from '@stencil/core';
+import {Component, Prop, Element, Event, EventEmitter} from '@stencil/core';
+import get from 'lodash/get';
 import Fixtable from 'fixtable/dist/fixtable';
 
 // For some reason this works in sandbox, but stencil doesn't distribute the delcaration
@@ -54,7 +55,7 @@ export interface FixtableOptions {
   pageSizeChoices?: number[];
   //TODO: Fix this to be strictly typed
   // onUpdate?: <T extends OnUpdateResponse>(onUpdateParameters?: OnUpdateParameters) => Promise<T>;
-  onUpdate?: (onUpdateParameters?: OnUpdateParameters) => Promise<OnUpdateResponse>;
+  clientProcess: boolean;
 }
 
 export const defaultFixtableOptions = {
@@ -65,12 +66,12 @@ export const defaultFixtableOptions = {
 
   // EXAMPLE: How you'd write the table cell if inserting directly into the
   // cellComponentFactory: (row: any, column: Column) => {
-  //   return <span>{row[column.key]}</span>
+  //   return <span>{get(row, column.key)}</span>
   // }
   // TODO: Rename lose factory
   cellComponentFactory: (row: any, column: Column) => {
     let newCell =  document.createElement('span');
-    const contents = row[column.key];
+    const contents = get(row, column.key);
     newCell.innerText = contents ? contents : '';
     return newCell;
   }
@@ -113,8 +114,8 @@ export class FixtableGrid {
   pageSize: number = 25;
 
 
-  @State() isLoading: boolean = false;
-  @State() displayedRows: any = [];
+  isLoading: boolean = false;
+  displayedRows: any = [];
 
   @Prop() rows: any[];
   @Prop() options: FixtableOptions;
@@ -165,13 +166,13 @@ export class FixtableGrid {
 
     // If server-driven, run update and toggle isLoading
     this.updateRows();
-    this.displayedRows = this.rows;
+    this.displayedRows = this.keyedData;
   }
 
   componentWillUpdate() {
-     this.total = this.total ? this.total : null;
-     this.displayedRows = this.rows;
-     this.isLoading = false;
+    // this.total = this.total ? this.total : null;
+    this.displayedRows = this.keyedData;
+    this.isLoading = false;
   }
 
   componentDidLoad() {
@@ -241,7 +242,7 @@ export class FixtableGrid {
   }
 
   updateRows() {
-    if (this.options.onUpdate) {
+    if (!this.options.clientProcess) {
       let filters = {};
       filters = Object.keys(this.columnFilters).map((columnKey) => {
         filters[columnKey] = this.columnFilters[columnKey].value;
@@ -257,12 +258,6 @@ export class FixtableGrid {
 
       this.isLoading = true;
       this.onPageChange.emit({filters, sortBy, sortDirection, pageSize, pageNumber});
-      // this.options.onUpdate({filters, sortBy, sortDirection, pageSize, pageNumber})
-      //   .then((onUpdateReponse) => {
-      //     this.total = onUpdateReponse.total ? onUpdateReponse.total : null;
-      //     this.displayedRows = onUpdateReponse.entities;
-      //     this.isLoading = false;
-      //   })
     } else {
       this.displayedRows = [...this.clientProcessedRows()];
     }

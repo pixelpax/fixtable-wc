@@ -43,11 +43,6 @@ const example2 = {
   ],
   options: {
     fixtableClass: "restrict-height",
-    onUpdate() {
-      return new Promise<OnUpdateResponse>((resolve) => {
-        setTimeout(() => resolve({entities: data, total: data.length}), 1000);
-      });
-    }
   }
 };
 
