@@ -375,7 +375,7 @@ This is the original CSS from fixtable-core
     height: calc(100% - 15px);
   }
 
-  /* Secondary table inside fixtable row */
+/* Secondary table inside fixtable row */
   .fixtable-grid .fixtable-inner table.table.table-equal-columns {
     table-layout: fixed !important;
   }
@@ -398,6 +398,7 @@ This is the original CSS from fixtable-core
       overflow: auto;
     }
   }
+/* END Secondary table */
 
 
 

@@ -1,30 +1,6 @@
 import {Component, State} from '@stencil/core';
 import { getDemoData } from "./fixtable-demo.data";
-import { OnUpdateParameters, OnUpdateResponse } from "../fixtable-grid/fixtable-grid";
-
-const data = getDemoData();
-
-// const example1 = {
-//   rows: data,
-//   columns: [
-//     {
-//       key: 'name',
-//       sortable: true,
-//       filterable: true
-//     },
-//     {
-//       key: 'address',
-//       sortable: true,
-//       filterable: true
-//     },
-//     {
-//       key: 'alignment'
-//     }
-//   ],
-//   options: {
-//     fixtableClass: "restrict-height"
-//   }
-// };
+import { OnUpdateParameters } from "../fixtable-grid/fixtable-grid";
 
 const example2 = {
   rows: [],
@@ -42,7 +18,7 @@ const example2 = {
     }
   ],
   options: {
-    fixtableClass: "restrict-height",
+    fixtableClass: 'restrict-height',
   }
 };
 
@@ -65,9 +41,6 @@ export class FixtableDemo {
 
   onUpdate(updateParams: OnUpdateParameters) {
     console.log(updateParams);
-    // return new Promise<OnUpdateResponse>((resolve) => {
-    //   setTimeout(() => resolve({entities: data, total: data.length}), 1000);
-    // });
     setTimeout(() => {
       this.rows0 = getDemoData();
       this.total0 = this.rows0.length;

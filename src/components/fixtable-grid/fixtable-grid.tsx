@@ -22,13 +22,6 @@ export interface Column {
 export type JSXFactory = (...args: any[]) => VNode;
 export type DOMElementFactory = (...args: any[]) => HTMLElement;
 
-// Could add this back to the menu if there's any demand for it
-// export interface JSXComponentInterface {
-//   new: () => {
-//     render: () => VNode
-//   }
-// }
-
 export type ComponentFactory = JSXFactory |
                                DOMElementFactory
 
@@ -55,7 +48,7 @@ export interface FixtableOptions {
   pageSizeChoices?: number[];
   //TODO: Fix this to be strictly typed
   // onUpdate?: <T extends OnUpdateResponse>(onUpdateParameters?: OnUpdateParameters) => Promise<T>;
-  clientProcess: boolean;
+  clientProcessing?: boolean;
 }
 
 export const defaultFixtableOptions = {
@@ -242,7 +235,7 @@ export class FixtableGrid {
   }
 
   updateRows() {
-    if (!this.options.clientProcess) {
+    if (!this.options.clientProcessing) {
       let filters = {};
       filters = Object.keys(this.columnFilters).map((columnKey) => {
         filters[columnKey] = this.columnFilters[columnKey].value;
@@ -434,3 +427,4 @@ export class FixtableGrid {
     );
   }
 }
+
