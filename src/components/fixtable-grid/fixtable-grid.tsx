@@ -1,4 +1,4 @@
-import {Component, Prop, Element, Event, EventEmitter} from '@stencil/core';
+import {Component, Prop, State, Element, Event, EventEmitter} from '@stencil/core';
 import get from 'lodash/get';
 import Fixtable from 'fixtable/dist/fixtable';
 
@@ -44,8 +44,10 @@ export interface FixtableOptions {
   columnFilters?: any[];
   rowSelection?: boolean;
   checkBoxHeader?: () => Element;
+  selectableRows?: boolean;
   cellComponentFactory?: ComponentFactory;
   pageSizeChoices?: number[];
+  width?: number;
   //TODO: Fix this to be strictly typed
   // onUpdate?: <T extends OnUpdateResponse>(onUpdateParameters?: OnUpdateParameters) => Promise<T>;
   clientProcessing?: boolean;
@@ -110,11 +112,18 @@ export class FixtableGrid {
   isLoading: boolean = false;
   displayedRows: any = [];
 
+  @State()
+  selectedRows: boolean[] = [];
+  selectionModified: boolean = false;
+
   @Prop() rows: any[];
   @Prop() options: FixtableOptions;
   @Prop() columns: Column[];
   @Prop() total: number = null;
+
   @Event() onPageChange: EventEmitter<OnUpdateParameters>;
+  @Event() updateSelection: EventEmitter<any[]>;
+
   @Element() element: HTMLElement;
 
   // TODO: Get rid of underscores for private methods and attributes
@@ -160,12 +169,18 @@ export class FixtableGrid {
     // If server-driven, run update and toggle isLoading
     this.updateRows();
     this.displayedRows = this.keyedData;
+    this.fillSelectedRowsArray(false);
   }
 
   componentWillUpdate() {
     // this.total = this.total ? this.total : null;
     this.displayedRows = this.keyedData;
     this.isLoading = false;
+
+    // This could lead to danger if more logic is happening here
+    if (!this.selectionModified) {
+      this.fillSelectedRowsArray(false);
+    }
   }
 
   componentDidLoad() {
@@ -298,6 +313,42 @@ export class FixtableGrid {
     return this.total ? Math.ceil(this.total/this.pageSize) : 1;
   }
 
+  fillSelectedRowsArray(value: boolean) {
+    this.selectedRows = [] as boolean[];
+    for (let i=0; i < this.rows.length; i++) {
+      this.selectedRows.push(value);
+    }
+  }
+
+  onToggleSelectAll() {
+    if (!this.selectedRows.every(r => r)) {
+      this.fillSelectedRowsArray(true);
+    } else {
+      this.fillSelectedRowsArray(false);
+    }
+    this.broadcastUpdateSelection();
+  }
+
+  onToggleRow(rowIndex: number) {
+    this.selectedRows[rowIndex] = !this.selectedRows[rowIndex];
+    this.selectedRows = [...this.selectedRows];
+    this.broadcastUpdateSelection();
+  }
+
+  broadcastUpdateSelection() {
+    this.selectionModified = true;
+
+    let returnSection = this.selectedRows.map((val, i) => {
+      if (val) {
+        return this.rows[i]
+      } else {
+        return null;
+      }
+    }).filter(row => row);
+
+    this.updateSelection.emit(returnSection);
+  }
+
   render() {
 
     let {options, columns} = this;
@@ -335,6 +386,15 @@ export class FixtableGrid {
               {/** Column Labels **/}
               <tr class="fixtable-column-headers">
                 {
+                  this.options.selectableRows ?
+                  <th>
+                    <div class="fixtable-checkbox">
+                      <input type="checkbox" onChange={this.onToggleSelectAll.bind(this)}/>
+                    </div>
+                  </th>
+                  : null
+                }
+                {
                   columns.map((column) => {
                     let caretClass = this.sortColumn === column ? 'fixtable-caret' : '';
                     if (this.sortDirection !== 1) {
@@ -358,6 +418,11 @@ export class FixtableGrid {
               {/** Column Filters **/}
               <tr class="fixtable-column-filters">
               {
+                this.options.selectableRows ?
+                  <th></th>
+                  : null
+              }
+              {
                 this.columns.map((column) =>
                   <th>
                     <div>
@@ -379,8 +444,17 @@ export class FixtableGrid {
               !this.isLoading ?
              <tbody>
              {
-               this.displayedRows.map((row) =>
+               this.displayedRows.map((row, i) =>
                 <tr key={row._fixtableKey}>
+                {
+                  this.options.selectableRows ?
+                    <td>
+                      <div class="fixtable-checkbox" >
+                         <input type="checkbox" checked={this.selectedRows[i]} onChange={this.onToggleRow.bind(this, i)}/>
+                      </div>
+                    </td>
+                    : null
+                }
                 {
                   columns.map((col /*(, colIndex)*/) => {
                     return (
@@ -415,13 +489,13 @@ export class FixtableGrid {
             : null
         }
         <div class="fixtable-footer">
-          <button onClick={() => this.onPreviousPage()} style={{visibility: this.pageNumber === 1 ? 'hidden' : 'visible'}}>Previous</button>
+          <span class="page-number" onClick={() => this.onPreviousPage()} style={{visibility: this.pageNumber === 1 ? 'hidden' : 'visible'}}>Previous</span>
           {
             pageNumbers.map((i) => {
               return <span class="page-number" onClick={this.onChangePageNumber.bind(this, i)}>{i}</span>
             })
           }
-          <button onClick={() => this.onNextPage()} style={{visibility: this.pageNumber === this.lastPage ? 'hidden' : 'visible'}}>Next</button>
+          <span class="page-number" onClick={() => this.onNextPage()} style={{visibility: this.pageNumber === this.lastPage ? 'hidden' : 'visible'}}>Next</span>
         </div>
       </div>
     );

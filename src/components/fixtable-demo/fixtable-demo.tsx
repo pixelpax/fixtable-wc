@@ -19,6 +19,7 @@ const example2 = {
   ],
   options: {
     fixtableClass: 'restrict-height',
+    selectableRows: true
   }
 };
 

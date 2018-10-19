@@ -120,6 +120,7 @@ declare global {
     export interface FixtableGridAttributes extends HTMLAttributes {
       'columns'?: Column[];
       'onOnPageChange'?: (event: CustomEvent<OnUpdateParameters>) => void;
+      'onUpdateSelection'?: (event: CustomEvent<any[]>) => void;
       'options'?: FixtableOptions;
       'rows'?: any[];
       'total'?: number;
